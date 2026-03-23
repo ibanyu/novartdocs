@@ -1,0 +1,887 @@
+openapi: 3.0.3
+info:
+  title: Novart SaaS Open API
+  description: >
+    本文档描述 Novart 开放 SaaS HTTP API（路径均以 `/openapi/v1/` 开头）。
+
+
+    **网关前缀**：完整 URL 通常包含部署前缀，例如测试环境：
+
+    `https://www.adsturbo.ai/klian/novartapi` + `/openapi/v1/img/create`。
+
+
+    **认证（默认）**：除下述 **用量查询** 外，其余路径请求头必须携带 `x-pal-key`（API
+    Key）。调用方身份仅通过该密钥识别；请求体中无需再传身份类字段。
+
+
+    **例外：`POST /openapi/v1/usage`**：在服务端使用标准会话链路（`InitStandardReq`），适用于 **SaaS
+    控制台等已登录页面**。**不使用** `x-pal-key`；请求体需符合站内标准 POST 约定（先解析会话头、再解析业务体，常见含 `token`
+    等字段，与 `/base/novart/...` 类接口一致）。
+
+
+    **请求体**：`Content-Type: application/json`。可将「公共字段」与业务字段写在同一 JSON
+    中；未识别的字段会被忽略。
+
+
+    **成功响应**：HTTP 200，JSON 形如 `{ "ret": 1, "data": { "ent": <业务数据> } }`。
+
+
+    **业务错误**：HTTP 200，`ret` 不为 1 时见 `msg` 说明。
+
+
+    **请求失败**：对需 API Key 的接口，缺少 `x-pal-key` 可能返回 HTTP 401（纯文本）；会话类接口鉴权失败以业务
+    `ret`/`msg` 或网关返回为准；JSON 无法解析可能返回 HTTP 400（纯文本）。
+
+
+    **可选**：查询参数 `gzip=1` 表示请求体为 gzip 压缩后的 JSON。
+  version: 1.0.0
+servers:
+  - url: https://www.adsturbo.ai/klian/novartapi
+    description: 测试环境（示例，含网关路径前缀）
+  - url: /
+    description: 服务根路径无额外前缀时可直接使用下方 path
+tags:
+  - name: Image
+    description: 图片创作
+  - name: AiActor
+    description: Open API — 系统演员
+  - name: Persona
+    description: Open API — 自定义 Persona
+  - name: AdClone
+    description: Open API — 视频复刻 AdClone
+  - name: Work
+    description: Open API — 异步任务状态
+  - name: Usage
+    description: 用量查询（会话登录，非 x-pal-key OpenAPI）
+security:
+  - ApiKeyAuth: []
+paths:
+  /openapi/v1/img/create:
+    post:
+      tags:
+        - Image
+      summary: 用户创作图片
+      operationId: saasImageCreate
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+        - $ref: '#/components/parameters/HeaderAccept'
+        - $ref: '#/components/parameters/HeaderAcceptLanguage'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/ImageCreateBody'
+            examples:
+              testEnvWebClient:
+                summary: 测试环境 Web 客户端（与 curl 示例一致）
+                value:
+                  h_dt: 0
+                  h_et: 2
+                  h_lc: zh-CN
+                  h_src: 45
+                  h_ts: 1774013573679
+                  zone: 28800
+                  prompt: 生成一个亚洲小朋友，骑着一只泰迪狗，狗有翅膀，动漫类型
+                  model: nanobanana-pro
+                  image_urls: []
+                  ratio: '9:16'
+                  resolution: 2k
+                  concurrency: 1
+                  sync_mod: false
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessImageCreateEnt'
+  /openapi/v1/aiactor/list:
+    post:
+      tags:
+        - AiActor
+      summary: 系统演员列表
+      operationId: openAiActorList
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenAiActorListBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenAiActorListEnt'
+  /openapi/v1/aiactor/say:
+    post:
+      tags:
+        - AiActor
+      summary: 系统演员语音生成
+      operationId: openAiActorSay
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenAiActorSayBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenAiActorSayEnt'
+  /openapi/v1/aiactor/perform:
+    post:
+      tags:
+        - AiActor
+      summary: 系统演员演出
+      operationId: openAiActorPerform
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenAiActorPerformBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+  /openapi/v1/persona/create:
+    post:
+      tags:
+        - Persona
+      summary: 创建自定义 Persona
+      operationId: openPersonaCreate
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenPersonaCreateBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
+  /openapi/v1/persona/delete:
+    post:
+      tags:
+        - Persona
+      summary: 删除自定义 Persona
+      operationId: openPersonaDelete
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenPersonaDeleteBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenPersonaDeleteEnt'
+  /openapi/v1/adclone/analyze:
+    post:
+      tags:
+        - AdClone
+      summary: 视频复刻 — 分析
+      operationId: openAdCloneAnalyze
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenAdCloneAnalyzeBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenAdCloneAnalyzeEnt'
+  /openapi/v1/adclone/generate:
+    post:
+      tags:
+        - AdClone
+      summary: 视频复刻 — 生成
+      operationId: openAdCloneGenerate
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenAdCloneGenerateBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+  /openapi/v1/work/status:
+    post:
+      tags:
+        - Work
+      summary: 查询异步任务状态
+      operationId: openGetWorkStatus
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenGetWorkStatusBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+  /openapi/v1/persona/status:
+    post:
+      tags:
+        - Persona
+      summary: 查询 Persona 状态
+      operationId: openGetPersonaStatus
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/SaaSCommonJsonHead'
+                - $ref: '#/components/schemas/OpenGetPersonaStatusBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
+  /openapi/v1/usage:
+    post:
+      tags:
+        - Usage
+      summary: 用量查询（SaaS 控制台 · 会话登录）
+      description: >
+        与其它 `/openapi/v1/*` 不同：走 **标准会话鉴权**（`InitStandardReq`），**不要**使用请求头
+        `x-pal-key`。
+
+        JSON body 与站内标准 POST 相同：先绑定会话头字段，再绑定下方业务字段（`offset` / `limit`）。
+      operationId: openGetUsage
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/QueryGzip'
+        - $ref: '#/components/parameters/HeaderXHost'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/StandardSessionJsonHead'
+                - $ref: '#/components/schemas/OpenGetUsageBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenUsageEnt'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-pal-key
+      description: |
+        SaaS API Key，必填（形如 `sk_` 前缀）。请勿将真实密钥写入文档或提交到仓库。
+  parameters:
+    QueryGzip:
+      name: gzip
+      in: query
+      required: false
+      schema:
+        type: integer
+        enum:
+          - 0
+          - 1
+      description: 为 1 时表示请求 body 为 gzip 压缩的 JSON
+    HeaderXHost:
+      name: X-Host
+      in: header
+      required: false
+      schema:
+        type: string
+      description: 可选，透传 Host
+    HeaderAccept:
+      name: Accept
+      in: header
+      required: false
+      schema:
+        type: string
+        default: application/json, text/plain, */*
+    HeaderAcceptLanguage:
+      name: Accept-Language
+      in: header
+      required: false
+      schema:
+        type: string
+        example: zh-CN
+  schemas:
+    StandardSessionJsonHead:
+      type: object
+      description: >
+        与 `InitStandardReq` 第一次 JSON 解析对应的会话头字段（与站内 `/base/novart/...` POST
+        一致）。字段名、是否必填以实际客户端与网关为准；此处仅列举常见项。
+      properties:
+        token:
+          type: string
+          description: 登录会话 token
+        h_m:
+          type: integer
+          format: int64
+          description: 与会话一并传递的数值字段（以服务端鉴权结果为准）
+        h_lc:
+          type: string
+          example: zh-CN
+        h_src:
+          type: integer
+          format: int32
+        zone:
+          type: integer
+          format: int32
+        zone_name:
+          type: string
+        h_dt:
+          type: integer
+          format: int32
+        h_et:
+          type: integer
+          format: int32
+        h_ts:
+          type: integer
+          format: int64
+        h_did:
+          type: string
+        h_av:
+          type: string
+        product:
+          type: string
+        atype:
+          type: integer
+          description: 鉴权类型（客户端约定）
+    SaaSCommonJsonHead:
+      type: object
+      description: |
+        可选的客户端公共字段（语言、来源、时区相关等）。未使用到的字段可省略；部分字段在 Web 客户端中较常见，可与业务参数混写在同一 JSON 中。
+      properties:
+        h_lc:
+          type: string
+          description: 语言/区域，如 zh-CN
+          example: zh-CN
+        h_src:
+          type: integer
+          format: int32
+          description: 来源标识（客户端约定）
+          example: 45
+        zone:
+          type: integer
+          format: int32
+          description: 时区偏移（秒）等客户端约定含义，如 28800
+          example: 28800
+        zone_name:
+          type: string
+        h_dt:
+          type: integer
+          description: 可选，客户端自定义
+          example: 0
+        h_et:
+          type: integer
+          description: 可选，客户端自定义
+          example: 2
+        h_ts:
+          type: integer
+          format: int64
+          description: 客户端时间戳（毫秒，可选）
+          example: 1774013573679
+    ApiErrorEnvelope:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          description: 非 1 表示失败
+        msg:
+          type: string
+    ImageCreateBody:
+      type: object
+      description: 图片创作业务参数；身份仅通过请求头 `x-pal-key` 传递。
+      properties:
+        prompt:
+          type: string
+          description: 文生图提示词
+        image_urls:
+          type: array
+          items:
+            type: string
+        model:
+          type: string
+          example: nanobanana-pro
+        ratio:
+          type: string
+          example: '9:16'
+        resolution:
+          type: string
+          example: 2k
+        concurrency:
+          type: integer
+          format: int32
+          example: 1
+        sync_mod:
+          type: boolean
+          example: false
+    OpenAiActorListBody:
+      type: object
+      description: 系统演员列表筛选与分页；身份仅通过 `x-pal-key` 传递。
+      properties:
+        gender:
+          type: array
+          items:
+            type: string
+        age:
+          type: array
+          items:
+            type: string
+        situation:
+          type: array
+          items:
+            type: string
+        sort_by:
+          type: string
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+    OpenAiActorSayBody:
+      type: object
+      description: 系统演员语音合成参数；身份仅通过 `x-pal-key` 传递。
+      properties:
+        actor_id:
+          type: string
+        script:
+          type: string
+        auto_emotion:
+          type: boolean
+        speed:
+          type: number
+          format: float
+        stability:
+          type: number
+          format: float
+        similarity:
+          type: number
+          format: float
+    OpenAiActorPerformBody:
+      type: object
+      description: 系统演员演出任务参数；身份仅通过 `x-pal-key` 传递。
+      properties:
+        script:
+          type: string
+        actor_id:
+          type: string
+        auto_emotion:
+          type: boolean
+        speed:
+          type: number
+          format: float
+        stability:
+          type: number
+          format: float
+        style:
+          type: number
+          format: float
+        speaker_boost:
+          type: boolean
+        similarity:
+          type: number
+          format: float
+        callback_id:
+          type: string
+    OpenPersonaCreateBody:
+      type: object
+      description: 自定义 Persona 创建参数；身份仅通过 `x-pal-key` 传递。
+      properties:
+        photo_url:
+          type: string
+        voice_audio_url:
+          type: string
+        name:
+          type: string
+        callback_id:
+          type: string
+    OpenPersonaDeleteBody:
+      type: object
+      description: 删除 Persona；身份仅通过 `x-pal-key` 传递。
+      properties:
+        actor_id:
+          type: string
+    OpenAdCloneAnalyzeBody:
+      type: object
+      description: 视频复刻分析参数；身份仅通过 `x-pal-key` 传递。
+      properties:
+        video_url:
+          type: string
+        clip_start:
+          type: integer
+          format: int32
+        clip_end:
+          type: integer
+          format: int32
+    OpenAdCloneGenerateBody:
+      type: object
+      description: 视频复刻生成参数；身份仅通过 `x-pal-key` 传递。
+      properties:
+        prompt:
+          type: string
+        video_url:
+          type: string
+        concurrent:
+          type: integer
+          format: int32
+        callback_id:
+          type: string
+    OpenGetWorkStatusBody:
+      type: object
+      description: 查询异步任务状态；身份仅通过 `x-pal-key` 传递。
+      properties:
+        workspace_id:
+          type: string
+    OpenGetPersonaStatusBody:
+      type: object
+      description: 查询 Persona 状态；身份仅通过 `x-pal-key` 传递。
+      properties:
+        actor_id:
+          type: string
+    OpenGetUsageBody:
+      type: object
+      description: 用量分页业务参数（与会话头字段合并于同一 JSON body）。
+      properties:
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+    ImageCreateData:
+      type: object
+      properties:
+        images:
+          type: array
+          items:
+            type: string
+        workspace_ids:
+          type: array
+          items:
+            type: string
+    OpenAiActorSayData:
+      type: object
+      properties:
+        audio_url:
+          type: string
+        duration:
+          type: integer
+          format: int32
+    OpenAiActorListData:
+      type: object
+      properties:
+        infos:
+          type: array
+          items:
+            type: object
+            description: 演员信息对象（字段以实际返回为准）
+            additionalProperties: true
+        offset:
+          type: integer
+          format: int32
+        more:
+          type: boolean
+        total:
+          type: integer
+          format: int32
+    OpenAdCloneAnalyzeData:
+      type: object
+      properties:
+        prompt:
+          type: string
+        video_segment_url:
+          type: string
+        duration:
+          type: number
+          format: float
+    OpenPersonaDeleteData:
+      type: object
+      properties:
+        ok:
+          type: boolean
+    OpenWorkData:
+      type: object
+      properties:
+        workspace_id:
+          type: string
+        status:
+          type: string
+        callback_id:
+          type: string
+        result_type:
+          type: string
+        result_url:
+          type: string
+        thumbnail_url:
+          type: string
+        duration:
+          type: number
+          format: float
+        message:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+    OpenPersonaData:
+      type: object
+      properties:
+        actor_id:
+          type: string
+        status:
+          type: string
+        callback_id:
+          type: string
+        name:
+          type: string
+        photo_url:
+          type: string
+        voice_id:
+          type: string
+        voice_url:
+          type: string
+        preview_image_url:
+          type: string
+        preview_video_url:
+          type: string
+        voices:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        message:
+          type: string
+        created_at:
+          type: integer
+          format: int64
+    OpenUsageItem:
+      type: object
+      properties:
+        biz_type:
+          type: string
+        amount:
+          type: number
+          format: float
+        timestamp:
+          type: integer
+          format: int64
+        remark:
+          type: string
+        direction:
+          type: string
+    OpenUsageData:
+      type: object
+      properties:
+        remaining_credits:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenUsageItem'
+        has_more:
+          type: boolean
+    ApiSuccessImageCreateEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/ImageCreateData'
+    ApiSuccessOpenAiActorListEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenAiActorListData'
+    ApiSuccessOpenAiActorSayEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenAiActorSayData'
+    ApiSuccessOpenWorkEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenWorkData'
+    ApiSuccessOpenPersonaEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenPersonaData'
+    ApiSuccessOpenPersonaDeleteEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenPersonaDeleteData'
+    ApiSuccessOpenAdCloneAnalyzeEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenAdCloneAnalyzeData'
+    ApiSuccessOpenUsageEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenUsageData'
