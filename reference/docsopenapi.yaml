@@ -658,9 +658,7 @@ components:
         infos:
           type: array
           items:
-            type: object
-            description: 演员信息对象（字段以实际返回为准）
-            additionalProperties: true
+            $ref: '#/components/schemas/AiActorInfo'
         offset:
           type: integer
           format: int32
@@ -714,6 +712,7 @@ components:
           type: string
         status:
           type: string
+          description: pending / processing / completed / failed
         callback_id:
           type: string
         name:
@@ -731,8 +730,7 @@ components:
         voices:
           type: array
           items:
-            type: object
-            additionalProperties: true
+            $ref: '#/components/schemas/AiActorVoiceOption'
         message:
           type: string
         created_at:
@@ -753,6 +751,9 @@ components:
           type: string
         direction:
           type: string
+        api_key:
+          type: string
+          description: 触发来源的 API Key 标识（空表示 Web 端）
     OpenUsageData:
       type: object
       properties:
@@ -885,3 +886,68 @@ components:
           properties:
             ent:
               $ref: '#/components/schemas/OpenUsageData'
+    AiActorInfo:
+      type: object
+      description: 系统演员信息
+      properties:
+        actor_id:
+          type: string
+        name:
+          type: string
+        age:
+          type: string
+        gender:
+          type: string
+        situation:
+          type: array
+          items:
+            type: string
+        pose:
+          type: string
+        shot_type:
+          type: string
+        skin_tone:
+          type: string
+        accessories:
+          type: array
+          items:
+            type: string
+        voice_id:
+          type: string
+        special_for:
+          type: array
+          items:
+            type: string
+        preview_url:
+          type: string
+        photo_url:
+          type: string
+        show_off_url:
+          type: string
+        light:
+          type: string
+        audition_audio_url:
+          type: string
+        score:
+          type: integer
+          format: int32
+        favourite:
+          type: boolean
+        status:
+          type: string
+        voices:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiActorVoiceOption'
+    AiActorVoiceOption:
+      type: object
+      description: 演员语音选项
+      properties:
+        voice_id:
+          type: string
+        voice_url:
+          type: string
+        voice_description:
+          type: string
+        source:
+          type: string
