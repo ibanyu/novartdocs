@@ -2,57 +2,40 @@ openapi: 3.0.3
 info:
   title: Novart SaaS Open API
   description: >
-    本文档描述 Novart 开放 SaaS HTTP API（路径均以 `/openapi/v1/` 开头）。
+    Novart SaaS Open API 文档，所有接口路径以 `/openapi/v1/` 开头。
 
 
-    **网关前缀**：完整 URL 通常包含部署前缀，例如测试环境：
-
-    `https://www.adsturbo.ai/klian/novartapi` + `/openapi/v1/img/create`。
+    **Base URL**：`https://www.adsturbo.ai/klian/novartapi`
 
 
-    **认证（默认）**：除下述 **用量查询** 外，其余路径请求头必须携带 `x-pal-key`（API
-    Key）。调用方身份仅通过该密钥识别；请求体中无需再传身份类字段。
+    **认证**：所有请求必须在请求头中携带 `x-pal-key`（API Key）。API Key 可在
+    [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中手动创建。
 
 
-    **例外：`POST /openapi/v1/usage`**：在服务端使用标准会话链路（`InitStandardReq`），适用于 **SaaS
-    控制台等已登录页面**。**不使用** `x-pal-key`；请求体需符合站内标准 POST 约定（先解析会话头、再解析业务体，常见含 `token`
-    等字段，与 `/base/novart/...` 类接口一致）。
+    **请求体**：`Content-Type: application/json`
 
 
-    **请求体**：`Content-Type: application/json`。可将「公共字段」与业务字段写在同一 JSON
-    中；未识别的字段会被忽略。
+    **成功响应**：HTTP 200，JSON 格式 `{ "ret": 1, "data": { "ent": <业务数据> } }`
 
 
-    **成功响应**：HTTP 200，JSON 形如 `{ "ret": 1, "data": { "ent": <业务数据> } }`。
-
-
-    **业务错误**：HTTP 200，`ret` 不为 1 时见 `msg` 说明。
-
-
-    **请求失败**：对需 API Key 的接口，缺少 `x-pal-key` 可能返回 HTTP 401（纯文本）；会话类接口鉴权失败以业务
-    `ret`/`msg` 或网关返回为准；JSON 无法解析可能返回 HTTP 400（纯文本）。
-
-
-    **可选**：查询参数 `gzip=1` 表示请求体为 gzip 压缩后的 JSON。
+    **业务错误**：HTTP 200，`ret` 不为 1 时见 `msg` 字段说明。
   version: 1.0.0
 servers:
   - url: https://www.adsturbo.ai/klian/novartapi
-    description: 测试环境（示例，含网关路径前缀）
-  - url: /
-    description: 服务根路径无额外前缀时可直接使用下方 path
+    description: API 服务地址
 tags:
   - name: Image
     description: 图片创作
   - name: AiActor
-    description: Open API — 系统演员
+    description: 系统演员
   - name: Persona
-    description: Open API — 自定义 Persona
+    description: 自定义 Persona
   - name: AdClone
-    description: Open API — 视频复刻 AdClone
+    description: 视频复刻 AdClone
   - name: Work
-    description: Open API — 异步任务状态
+    description: 异步任务状态
   - name: Usage
-    description: 用量查询（会话登录，非 x-pal-key OpenAPI）
+    description: 用量查询
 security:
   - ApiKeyAuth: []
 paths:
@@ -62,29 +45,16 @@ paths:
         - Image
       summary: 用户创作图片
       operationId: saasImageCreate
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
-        - $ref: '#/components/parameters/HeaderAccept'
-        - $ref: '#/components/parameters/HeaderAcceptLanguage'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/ImageCreateBody'
+              $ref: '#/components/schemas/ImageCreateBody'
             examples:
-              testEnvWebClient:
-                summary: 测试环境 Web 客户端（与 curl 示例一致）
+              basic:
+                summary: 基本示例
                 value:
-                  h_dt: 0
-                  h_et: 2
-                  h_lc: zh-CN
-                  h_src: 45
-                  h_ts: 1774013573679
-                  zone: 28800
                   prompt: 生成一个亚洲小朋友，骑着一只泰迪狗，狗有翅膀，动漫类型
                   model: nanobanana-pro
                   image_urls: []
@@ -105,17 +75,12 @@ paths:
         - AiActor
       summary: 系统演员列表
       operationId: openAiActorList
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenAiActorListBody'
+              $ref: '#/components/schemas/OpenAiActorListBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -129,17 +94,12 @@ paths:
         - AiActor
       summary: 系统演员语音生成
       operationId: openAiActorSay
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenAiActorSayBody'
+              $ref: '#/components/schemas/OpenAiActorSayBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -153,17 +113,12 @@ paths:
         - AiActor
       summary: 系统演员演出
       operationId: openAiActorPerform
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenAiActorPerformBody'
+              $ref: '#/components/schemas/OpenAiActorPerformBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -177,17 +132,12 @@ paths:
         - Persona
       summary: 创建自定义 Persona
       operationId: openPersonaCreate
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenPersonaCreateBody'
+              $ref: '#/components/schemas/OpenPersonaCreateBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -201,17 +151,12 @@ paths:
         - Persona
       summary: 删除自定义 Persona
       operationId: openPersonaDelete
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenPersonaDeleteBody'
+              $ref: '#/components/schemas/OpenPersonaDeleteBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -225,17 +170,12 @@ paths:
         - AdClone
       summary: 视频复刻 — 分析
       operationId: openAdCloneAnalyze
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenAdCloneAnalyzeBody'
+              $ref: '#/components/schemas/OpenAdCloneAnalyzeBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -249,17 +189,12 @@ paths:
         - AdClone
       summary: 视频复刻 — 生成
       operationId: openAdCloneGenerate
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenAdCloneGenerateBody'
+              $ref: '#/components/schemas/OpenAdCloneGenerateBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -273,17 +208,12 @@ paths:
         - Work
       summary: 查询异步任务状态
       operationId: openGetWorkStatus
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenGetWorkStatusBody'
+              $ref: '#/components/schemas/OpenGetWorkStatusBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -297,17 +227,12 @@ paths:
         - Persona
       summary: 查询 Persona 状态
       operationId: openGetPersonaStatus
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/SaaSCommonJsonHead'
-                - $ref: '#/components/schemas/OpenGetPersonaStatusBody'
+              $ref: '#/components/schemas/OpenGetPersonaStatusBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -319,25 +244,14 @@ paths:
     post:
       tags:
         - Usage
-      summary: 用量查询（SaaS 控制台 · 会话登录）
-      description: >
-        与其它 `/openapi/v1/*` 不同：走 **标准会话鉴权**（`InitStandardReq`），**不要**使用请求头
-        `x-pal-key`。
-
-        JSON body 与站内标准 POST 相同：先绑定会话头字段，再绑定下方业务字段（`offset` / `limit`）。
+      summary: 用量查询
       operationId: openGetUsage
-      security: []
-      parameters:
-        - $ref: '#/components/parameters/QueryGzip'
-        - $ref: '#/components/parameters/HeaderXHost'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              allOf:
-                - $ref: '#/components/schemas/StandardSessionJsonHead'
-                - $ref: '#/components/schemas/OpenGetUsageBody'
+              $ref: '#/components/schemas/OpenGetUsageBody'
       responses:
         '200':
           description: JSON 业务响应
@@ -352,129 +266,11 @@ components:
       in: header
       name: x-pal-key
       description: |
-        SaaS API Key，必填（形如 `sk_` 前缀）。请勿将真实密钥写入文档或提交到仓库。
-  parameters:
-    QueryGzip:
-      name: gzip
-      in: query
-      required: false
-      schema:
-        type: integer
-        enum:
-          - 0
-          - 1
-      description: 为 1 时表示请求 body 为 gzip 压缩的 JSON
-    HeaderXHost:
-      name: X-Host
-      in: header
-      required: false
-      schema:
-        type: string
-      description: 可选，透传 Host
-    HeaderAccept:
-      name: Accept
-      in: header
-      required: false
-      schema:
-        type: string
-        default: application/json, text/plain, */*
-    HeaderAcceptLanguage:
-      name: Accept-Language
-      in: header
-      required: false
-      schema:
-        type: string
-        example: zh-CN
+        API Key，必填。可在 [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中创建。
   schemas:
-    StandardSessionJsonHead:
-      type: object
-      description: >
-        与 `InitStandardReq` 第一次 JSON 解析对应的会话头字段（与站内 `/base/novart/...` POST
-        一致）。字段名、是否必填以实际客户端与网关为准；此处仅列举常见项。
-      properties:
-        token:
-          type: string
-          description: 登录会话 token
-        h_m:
-          type: integer
-          format: int64
-          description: 与会话一并传递的数值字段（以服务端鉴权结果为准）
-        h_lc:
-          type: string
-          example: zh-CN
-        h_src:
-          type: integer
-          format: int32
-        zone:
-          type: integer
-          format: int32
-        zone_name:
-          type: string
-        h_dt:
-          type: integer
-          format: int32
-        h_et:
-          type: integer
-          format: int32
-        h_ts:
-          type: integer
-          format: int64
-        h_did:
-          type: string
-        h_av:
-          type: string
-        product:
-          type: string
-        atype:
-          type: integer
-          description: 鉴权类型（客户端约定）
-    SaaSCommonJsonHead:
-      type: object
-      description: |
-        可选的客户端公共字段（语言、来源、时区相关等）。未使用到的字段可省略；部分字段在 Web 客户端中较常见，可与业务参数混写在同一 JSON 中。
-      properties:
-        h_lc:
-          type: string
-          description: 语言/区域，如 zh-CN
-          example: zh-CN
-        h_src:
-          type: integer
-          format: int32
-          description: 来源标识（客户端约定）
-          example: 45
-        zone:
-          type: integer
-          format: int32
-          description: 时区偏移（秒）等客户端约定含义，如 28800
-          example: 28800
-        zone_name:
-          type: string
-        h_dt:
-          type: integer
-          description: 可选，客户端自定义
-          example: 0
-        h_et:
-          type: integer
-          description: 可选，客户端自定义
-          example: 2
-        h_ts:
-          type: integer
-          format: int64
-          description: 客户端时间戳（毫秒，可选）
-          example: 1774013573679
-    ApiErrorEnvelope:
-      type: object
-      required:
-        - ret
-      properties:
-        ret:
-          type: integer
-          description: 非 1 表示失败
-        msg:
-          type: string
     ImageCreateBody:
       type: object
-      description: 图片创作业务参数；身份仅通过请求头 `x-pal-key` 传递。
+      description: 图片创作业务参数
       properties:
         prompt:
           type: string
@@ -483,6 +279,7 @@ components:
           type: array
           items:
             type: string
+          description: edit 模式输入图片
         model:
           type: string
           example: nanobanana-pro
@@ -495,13 +292,14 @@ components:
         concurrency:
           type: integer
           format: int32
+          description: 并发数，控制一次性输出的结果数量
           example: 1
         sync_mod:
           type: boolean
           example: false
     OpenAiActorListBody:
       type: object
-      description: 系统演员列表筛选与分页；身份仅通过 `x-pal-key` 传递。
+      description: 系统演员列表筛选与分页
       properties:
         gender:
           type: array
@@ -525,7 +323,7 @@ components:
           format: int32
     OpenAiActorSayBody:
       type: object
-      description: 系统演员语音合成参数；身份仅通过 `x-pal-key` 传递。
+      description: 系统演员语音合成参数
       properties:
         actor_id:
           type: string
@@ -544,7 +342,7 @@ components:
           format: float
     OpenAiActorPerformBody:
       type: object
-      description: 系统演员演出任务参数；身份仅通过 `x-pal-key` 传递。
+      description: 系统演员演出任务参数
       properties:
         script:
           type: string
@@ -568,64 +366,74 @@ components:
           format: float
         callback_id:
           type: string
+          description: 自定义追踪 ID，webhook URL 后台配置
     OpenPersonaCreateBody:
       type: object
-      description: 自定义 Persona 创建参数；身份仅通过 `x-pal-key` 传递。
+      description: 自定义 Persona 创建参数
       properties:
         photo_url:
           type: string
         voice_audio_url:
           type: string
+          description: 可选，用于语音克隆
         name:
           type: string
         callback_id:
           type: string
+          description: 自定义追踪 ID，webhook URL 后台配置
     OpenPersonaDeleteBody:
       type: object
-      description: 删除 Persona；身份仅通过 `x-pal-key` 传递。
+      description: 删除 Persona
       properties:
         actor_id:
           type: string
     OpenAdCloneAnalyzeBody:
       type: object
-      description: 视频复刻分析参数；身份仅通过 `x-pal-key` 传递。
+      description: 视频复刻分析参数
       properties:
         video_url:
           type: string
+          description: 源视频 URL
         clip_start:
           type: integer
           format: int32
+          description: 圈选起始时间（秒）
         clip_end:
           type: integer
           format: int32
+          description: 圈选结束时间（秒），clip_end - clip_start <= 12
     OpenAdCloneGenerateBody:
       type: object
-      description: 视频复刻生成参数；身份仅通过 `x-pal-key` 传递。
+      description: 视频复刻生成参数
       properties:
         prompt:
           type: string
+          description: prompt（可在 Analyze 返回基础上修改）
         video_url:
           type: string
+          description: 源视频片段 URL（Analyze 返回的 video_segment_url）
         concurrent:
           type: integer
           format: int32
+          description: 并发生成数量
         callback_id:
           type: string
+          description: 自定义追踪 ID，webhook URL 后台配置
     OpenGetWorkStatusBody:
       type: object
-      description: 查询异步任务状态；身份仅通过 `x-pal-key` 传递。
+      description: 查询异步任务状态
       properties:
         workspace_id:
           type: string
     OpenGetPersonaStatusBody:
       type: object
-      description: 查询 Persona 状态；身份仅通过 `x-pal-key` 传递。
+      description: 查询 Persona 状态
       properties:
         actor_id:
           type: string
     OpenGetUsageBody:
       type: object
-      description: 用量分页业务参数（与会话头字段合并于同一 JSON body）。
+      description: 用量分页查询参数
       properties:
         offset:
           type: integer
@@ -672,11 +480,14 @@ components:
       properties:
         prompt:
           type: string
+          description: AI 分析生成的文生视频 prompt
         video_segment_url:
           type: string
+          description: 截取的视频片段 URL
         duration:
           type: number
           format: float
+          description: 片段时长（秒）
     OpenPersonaDeleteData:
       type: object
       properties:
@@ -689,6 +500,7 @@ components:
           type: string
         status:
           type: string
+          description: pending / processing / completed / failed
         callback_id:
           type: string
         result_type:
@@ -741,9 +553,11 @@ components:
       properties:
         biz_type:
           type: string
+          description: 业务类型：ad_clone, ai_actor, promo_video 等
         amount:
           type: number
           format: float
+          description: 积分数
         timestamp:
           type: integer
           format: int64
@@ -760,6 +574,7 @@ components:
         remaining_credits:
           type: integer
           format: int32
+          description: 剩余积分
         items:
           type: array
           items:
