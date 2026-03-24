@@ -8,5 +8,5 @@ excerpt: >
 api:
   file: docsopenapi.yaml
   operationId: openGetUsage
-hidden: false
+hidden: true
 ---
