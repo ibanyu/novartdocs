@@ -8,9 +8,8 @@ info:
     **Base URL**：`https://www.adsturbo.ai/klian/novartapi`
 
 
-    **认证**：所有请求必须在请求头中携带 Bearer Token。Token 可在
-    [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中手动创建。请求头格式：`Authorization:
-    Bearer <your-token>`
+    **认证**：所有请求必须在请求头中携带 `x-pal-key`（API Key）。API Key 可在
+    [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中手动创建。
 
 
     **请求体**：`Content-Type: application/json`
@@ -25,6 +24,8 @@ servers:
   - url: https://www.adsturbo.ai/klian/novartapi
     description: API 服务地址
 tags:
+  - name: Image
+    description: 图片创作
   - name: AiActor
     description: 系统演员
   - name: Persona
@@ -36,8 +37,38 @@ tags:
   - name: Usage
     description: 用量查询
 security:
-  - BearerAuth: []
+  - ApiKeyAuth: []
 paths:
+  /openapi/v1/img/create:
+    post:
+      tags:
+        - Image
+      summary: 用户创作图片
+      operationId: saasImageCreate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageCreateBody'
+            examples:
+              basic:
+                summary: 基本示例
+                value:
+                  prompt: 生成一个亚洲小朋友，骑着一只泰迪狗，狗有翅膀，动漫类型
+                  model: nanobanana-pro
+                  image_urls: []
+                  ratio: '9:16'
+                  resolution: 2k
+                  concurrency: 1
+                  sync_mod: false
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessImageCreateEnt'
   /openapi/v1/aiactor/list:
     post:
       tags:
@@ -133,6 +164,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaDeleteEnt'
+  /openapi/v1/persona/personal/list:
+    post:
+      tags:
+        - Persona
+      summary: 个人创建演员列表
+      description: 查询当前租户下用户自建 Persona（novart_actor_from_user），分页返回 `OpenPersonaData` 列表。
+      operationId: openPersonalList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenPersonalListBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenPersonalListEnt'
   /openapi/v1/adclone/analyze:
     post:
       tags:
@@ -230,13 +281,42 @@ paths:
                 $ref: '#/components/schemas/ApiSuccessOpenUsageEnt'
 components:
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-      description: >
-        Bearer Token 认证，必填。Token 可在 [www.adsturbo.ai](https://www.adsturbo.ai)
-        控制台中创建。请求头格式：`Authorization: Bearer <your-token>`
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-pal-key
+      description: |
+        API Key，必填。可在 [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中创建。
   schemas:
+    ImageCreateBody:
+      type: object
+      description: 图片创作业务参数
+      properties:
+        prompt:
+          type: string
+          description: 文生图提示词
+        image_urls:
+          type: array
+          items:
+            type: string
+          description: edit 模式输入图片
+        model:
+          type: string
+          example: nanobanana-pro
+        ratio:
+          type: string
+          example: '9:16'
+        resolution:
+          type: string
+          example: 2k
+        concurrency:
+          type: integer
+          format: int32
+          description: 并发数，控制一次性输出的结果数量
+          example: 1
+        sync_mod:
+          type: boolean
+          example: false
     OpenAiActorListBody:
       type: object
       description: 系统演员列表筛选与分页
@@ -327,6 +407,32 @@ components:
       properties:
         actor_id:
           type: string
+    OpenPersonalListBody:
+      type: object
+      description: 个人创建演员分页查询（与 Open API 身份字段一并由网关填充时可省略 body 中的 uid/owner_uid）
+      properties:
+        offset:
+          type: integer
+          format: int32
+        limit:
+          type: integer
+          format: int32
+    OpenPersonalListData:
+      type: object
+      description: 个人创建演员列表数据
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenPersonaData'
+        offset:
+          type: integer
+          format: int32
+        more:
+          type: boolean
+        total:
+          type: integer
+          format: int32
     OpenAdCloneAnalyzeBody:
       type: object
       description: 视频复刻分析参数
@@ -381,6 +487,17 @@ components:
         limit:
           type: integer
           format: int32
+    ImageCreateData:
+      type: object
+      properties:
+        images:
+          type: array
+          items:
+            type: string
+        workspace_ids:
+          type: array
+          items:
+            type: string
     OpenAiActorSayData:
       type: object
       properties:
@@ -510,6 +627,21 @@ components:
             $ref: '#/components/schemas/OpenUsageItem'
         has_more:
           type: boolean
+    ApiSuccessImageCreateEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/ImageCreateData'
     ApiSuccessOpenAiActorListEnt:
       type: object
       required:
@@ -585,6 +717,21 @@ components:
           properties:
             ent:
               $ref: '#/components/schemas/OpenPersonaDeleteData'
+    ApiSuccessOpenPersonalListEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenPersonalListData'
     ApiSuccessOpenAdCloneAnalyzeEnt:
       type: object
       required:
