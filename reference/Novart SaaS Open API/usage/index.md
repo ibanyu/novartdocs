@@ -1,4 +1,4 @@
 ---
 title: Usage
-hidden: false
+hidden: true
 ---
