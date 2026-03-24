@@ -8,8 +8,9 @@ info:
     **Base URL**：`https://www.adsturbo.ai/klian/novartapi`
 
 
-    **认证**：所有请求必须在请求头中携带 `x-pal-key`（API Key）。API Key 可在
-    [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中手动创建。
+    **认证**：所有请求须在请求头携带 Bearer Token。Token 可在
+    [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中手动创建。请求头格式：`Authorization:
+    Bearer <your-token>`
 
 
     **请求体**：`Content-Type: application/json`
@@ -24,8 +25,6 @@ servers:
   - url: https://www.adsturbo.ai/klian/novartapi
     description: API 服务地址
 tags:
-  - name: Image
-    description: 图片创作
   - name: AiActor
     description: 系统演员
   - name: Persona
@@ -34,41 +33,9 @@ tags:
     description: 视频复刻 AdClone
   - name: Work
     description: 异步任务状态
-  - name: Usage
-    description: 用量查询
 security:
-  - ApiKeyAuth: []
+  - BearerAuth: []
 paths:
-  /openapi/v1/img/create:
-    post:
-      tags:
-        - Image
-      summary: 用户创作图片
-      operationId: saasImageCreate
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ImageCreateBody'
-            examples:
-              basic:
-                summary: 基本示例
-                value:
-                  prompt: 生成一个亚洲小朋友，骑着一只泰迪狗，狗有翅膀，动漫类型
-                  model: nanobanana-pro
-                  image_urls: []
-                  ratio: '9:16'
-                  resolution: 2k
-                  concurrency: 1
-                  sync_mod: false
-      responses:
-        '200':
-          description: JSON 业务响应
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessImageCreateEnt'
   /openapi/v1/aiactor/list:
     post:
       tags:
@@ -126,7 +93,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
-  /openapi/v1/persona/create:
+  /openapi/v1/personal/create:
     post:
       tags:
         - Persona
@@ -145,7 +112,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
-  /openapi/v1/persona/delete:
+  /openapi/v1/personal/delete:
     post:
       tags:
         - Persona
@@ -164,12 +131,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaDeleteEnt'
-  /openapi/v1/persona/personal/list:
+  /openapi/v1/personal/list:
     post:
       tags:
         - Persona
       summary: 个人创建演员列表
-      description: 查询当前租户下用户自建 Persona（novart_actor_from_user），分页返回 `OpenPersonaData` 列表。
+      description: >
+        对应 proto `OpenPersonalList`：个人创建演员（`novart_actor_from_user`）。分页返回
+        `OpenPersonaData` 列表。
+
+        请求体中的 `api_key` / `uid` / `owner_uid` 可与网关填充的身份字段一并省略（由 SaaS 网关注入）。
       operationId: openPersonalList
       requestBody:
         required: true
@@ -241,7 +212,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
-  /openapi/v1/persona/status:
+  /openapi/v1/personal/status:
     post:
       tags:
         - Persona
@@ -260,66 +231,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
-  /openapi/v1/usage:
-    post:
-      tags:
-        - Usage
-      summary: 用量查询
-      operationId: openGetUsage
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OpenGetUsageBody'
-      responses:
-        '200':
-          description: JSON 业务响应
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessOpenUsageEnt'
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: x-pal-key
-      description: |
-        API Key，必填。可在 [www.adsturbo.ai](https://www.adsturbo.ai) 控制台中创建。
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        Bearer Token 认证，必填。Token 可在 [www.adsturbo.ai](https://www.adsturbo.ai)
+        控制台中创建。请求头格式：`Authorization: Bearer <your-token>`
   schemas:
-    ImageCreateBody:
-      type: object
-      description: 图片创作业务参数
-      properties:
-        prompt:
-          type: string
-          description: 文生图提示词
-        image_urls:
-          type: array
-          items:
-            type: string
-          description: edit 模式输入图片
-        model:
-          type: string
-          example: nanobanana-pro
-        ratio:
-          type: string
-          example: '9:16'
-        resolution:
-          type: string
-          example: 2k
-        concurrency:
-          type: integer
-          format: int32
-          description: 并发数，控制一次性输出的结果数量
-          example: 1
-        sync_mod:
-          type: boolean
-          example: false
     OpenAiActorListBody:
       type: object
-      description: 系统演员列表筛选与分页
+      description: >
+        对应 proto `OpenAiActorListReq`。筛选项传入值为**小写**；英文短语中空格转为连字符 `-`。
+
+        Age：senior, adult, young-adult, kid
+
+        Gender：female, male
+
+        Situation：balcony, beach, bedroom, car, coffee-shop, grwm, home,
+        kitchen, medical, news-anchor, office, podcast, snow, studio
+
+        Pose：arms-crossed, cross-legged, gesturing, leaning, leaning-forward,
+        legs-crossed, pointing, reclining, sitting, standing
+
+        Shot type：close-up, full-shot, long-shot, medium-close-up,
+        medium-full-shot, medium-shot
       properties:
         gender:
           type: array
@@ -341,9 +278,19 @@ components:
         limit:
           type: integer
           format: int32
+        pose:
+          type: array
+          items:
+            type: string
+        shot_type:
+          type: array
+          items:
+            type: string
     OpenAiActorSayBody:
       type: object
-      description: 系统演员语音合成参数
+      description: >-
+        对应 proto `OpenAiActorSayReq`。`api_key` / `uid` / `owner_uid` 可由 SaaS
+        网关填充。
       properties:
         actor_id:
           type: string
@@ -362,7 +309,9 @@ components:
           format: float
     OpenAiActorPerformBody:
       type: object
-      description: 系统演员演出任务参数
+      description: >-
+        对应 proto `OpenAiActorPerformReq`。异步任务，返回 `OpenWorkData`（含
+        `workspace_id`）。
       properties:
         script:
           type: string
@@ -389,13 +338,13 @@ components:
           description: 自定义追踪 ID，webhook URL 后台配置
     OpenPersonaCreateBody:
       type: object
-      description: 自定义 Persona 创建参数
+      description: 对应 proto `OpenPersonaCreateReq`。
       properties:
         photo_url:
           type: string
         voice_audio_url:
           type: string
-          description: 可选，用于语音克隆
+          description: 可选（optional），用于语音克隆
         name:
           type: string
         callback_id:
@@ -403,13 +352,15 @@ components:
           description: 自定义追踪 ID，webhook URL 后台配置
     OpenPersonaDeleteBody:
       type: object
-      description: 删除 Persona
+      description: 对应 proto `OpenPersonaDeleteReq`。
       properties:
         actor_id:
           type: string
     OpenPersonalListBody:
       type: object
-      description: 个人创建演员分页查询（与 Open API 身份字段一并由网关填充时可省略 body 中的 uid/owner_uid）
+      description: >
+        对应 proto `OpenPersonalListReq`：个人创建演员（novart_actor_from_user）。`offset` /
+        `limit` 为分页；`api_key` / `uid` / `owner_uid` 可由 SaaS 网关填充。
       properties:
         offset:
           type: integer
@@ -419,7 +370,7 @@ components:
           format: int32
     OpenPersonalListData:
       type: object
-      description: 个人创建演员列表数据
+      description: 对应 proto `OpenPersonalListData`。
       properties:
         items:
           type: array
@@ -435,7 +386,7 @@ components:
           format: int32
     OpenAdCloneAnalyzeBody:
       type: object
-      description: 视频复刻分析参数
+      description: 对应 proto `OpenAdCloneAnalyzeReq`。
       properties:
         video_url:
           type: string
@@ -450,7 +401,7 @@ components:
           description: 圈选结束时间（秒），clip_end - clip_start <= 12
     OpenAdCloneGenerateBody:
       type: object
-      description: 视频复刻生成参数
+      description: 对应 proto `OpenAdCloneGenerateReq`。响应为 `OpenWorkData`（含 `workspace_id`）。
       properties:
         prompt:
           type: string
@@ -467,37 +418,16 @@ components:
           description: 自定义追踪 ID，webhook URL 后台配置
     OpenGetWorkStatusBody:
       type: object
-      description: 查询异步任务状态
+      description: 对应 proto `OpenGetWorkStatusReq`。
       properties:
         workspace_id:
           type: string
     OpenGetPersonaStatusBody:
       type: object
-      description: 查询 Persona 状态
+      description: 对应 proto `OpenGetPersonaStatusReq`。
       properties:
         actor_id:
           type: string
-    OpenGetUsageBody:
-      type: object
-      description: 用量分页查询参数
-      properties:
-        offset:
-          type: integer
-          format: int32
-        limit:
-          type: integer
-          format: int32
-    ImageCreateData:
-      type: object
-      properties:
-        images:
-          type: array
-          items:
-            type: string
-        workspace_ids:
-          type: array
-          items:
-            type: string
     OpenAiActorSayData:
       type: object
       properties:
@@ -541,6 +471,7 @@ components:
           type: boolean
     OpenWorkData:
       type: object
+      description: 对应 proto `OpenWorkData`。异步任务结果摘要。
       properties:
         workspace_id:
           type: string
@@ -551,6 +482,10 @@ components:
           type: string
         result_type:
           type: string
+          description: >
+            与 novart_workspace_entry.result_type 一致：1=video 2=image 3=audio
+            4=text 5=structured；对外字符串为小写枚举名："video" | "image" | "audio" | "text"
+            | "structured"
         result_url:
           type: string
         thumbnail_url:
@@ -565,6 +500,7 @@ components:
           format: int64
     OpenPersonaData:
       type: object
+      description: 对应 proto `OpenPersonaData` 自定义 Persona。
       properties:
         actor_id:
           type: string
@@ -594,54 +530,6 @@ components:
         created_at:
           type: integer
           format: int64
-    OpenUsageItem:
-      type: object
-      properties:
-        biz_type:
-          type: string
-          description: 业务类型：ad_clone, ai_actor, promo_video 等
-        amount:
-          type: number
-          format: float
-          description: 积分数
-        timestamp:
-          type: integer
-          format: int64
-        remark:
-          type: string
-        direction:
-          type: string
-        api_key:
-          type: string
-          description: 触发来源的 API Key 标识（空表示 Web 端）
-    OpenUsageData:
-      type: object
-      properties:
-        remaining_credits:
-          type: integer
-          format: int32
-          description: 剩余积分
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/OpenUsageItem'
-        has_more:
-          type: boolean
-    ApiSuccessImageCreateEnt:
-      type: object
-      required:
-        - ret
-      properties:
-        ret:
-          type: integer
-          example: 1
-        msg:
-          type: string
-        data:
-          type: object
-          properties:
-            ent:
-              $ref: '#/components/schemas/ImageCreateData'
     ApiSuccessOpenAiActorListEnt:
       type: object
       required:
@@ -747,21 +635,6 @@ components:
           properties:
             ent:
               $ref: '#/components/schemas/OpenAdCloneAnalyzeData'
-    ApiSuccessOpenUsageEnt:
-      type: object
-      required:
-        - ret
-      properties:
-        ret:
-          type: integer
-          example: 1
-        msg:
-          type: string
-        data:
-          type: object
-          properties:
-            ent:
-              $ref: '#/components/schemas/OpenUsageData'
     AiActorInfo:
       type: object
       description: 系统演员信息
