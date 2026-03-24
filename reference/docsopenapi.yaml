@@ -25,8 +25,6 @@ servers:
   - url: https://www.adsturbo.ai/klian/novartapi
     description: API 服务地址
 tags:
-  - name: Image
-    description: 图片创作
   - name: AiActor
     description: 系统演员
   - name: Persona
@@ -40,36 +38,6 @@ tags:
 security:
   - BearerAuth: []
 paths:
-  /openapi/v1/img/create:
-    post:
-      tags:
-        - Image
-      summary: 用户创作图片
-      operationId: saasImageCreate
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ImageCreateBody'
-            examples:
-              basic:
-                summary: 基本示例
-                value:
-                  prompt: 生成一个亚洲小朋友，骑着一只泰迪狗，狗有翅膀，动漫类型
-                  model: nanobanana-pro
-                  image_urls: []
-                  ratio: '9:16'
-                  resolution: 2k
-                  concurrency: 1
-                  sync_mod: false
-      responses:
-        '200':
-          description: JSON 业务响应
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessImageCreateEnt'
   /openapi/v1/aiactor/list:
     post:
       tags:
@@ -269,35 +237,6 @@ components:
         Bearer Token 认证，必填。Token 可在 [www.adsturbo.ai](https://www.adsturbo.ai)
         控制台中创建。请求头格式：`Authorization: Bearer <your-token>`
   schemas:
-    ImageCreateBody:
-      type: object
-      description: 图片创作业务参数
-      properties:
-        prompt:
-          type: string
-          description: 文生图提示词
-        image_urls:
-          type: array
-          items:
-            type: string
-          description: edit 模式输入图片
-        model:
-          type: string
-          example: nanobanana-pro
-        ratio:
-          type: string
-          example: '9:16'
-        resolution:
-          type: string
-          example: 2k
-        concurrency:
-          type: integer
-          format: int32
-          description: 并发数，控制一次性输出的结果数量
-          example: 1
-        sync_mod:
-          type: boolean
-          example: false
     OpenAiActorListBody:
       type: object
       description: 系统演员列表筛选与分页
@@ -442,17 +381,6 @@ components:
         limit:
           type: integer
           format: int32
-    ImageCreateData:
-      type: object
-      properties:
-        images:
-          type: array
-          items:
-            type: string
-        workspace_ids:
-          type: array
-          items:
-            type: string
     OpenAiActorSayData:
       type: object
       properties:
@@ -582,21 +510,6 @@ components:
             $ref: '#/components/schemas/OpenUsageItem'
         has_more:
           type: boolean
-    ApiSuccessImageCreateEnt:
-      type: object
-      required:
-        - ret
-      properties:
-        ret:
-          type: integer
-          example: 1
-        msg:
-          type: string
-        data:
-          type: object
-          properties:
-            ent:
-              $ref: '#/components/schemas/ImageCreateData'
     ApiSuccessOpenAiActorListEnt:
       type: object
       required:
