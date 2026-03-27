@@ -35,6 +35,8 @@ tags:
     description: 视频复刻 AdClone
   - name: Work
     description: 异步任务状态
+  - name: Storage
+    description: 文件上传
   - name: Usage
     description: 用量查询
 security:
@@ -265,6 +267,74 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
+  /openapi/v1/storage/upload/once:
+    post:
+      tags:
+        - Storage
+      summary: 文件上传
+      description: >
+        通用文件上传接口。请求体为 `multipart/form-data`，包含 `data`（文件）和 `json`（JSON
+        参数字符串）两个字段。
+
+        当 `storagetype = 1` 时使用大文件上传通道，其余走普通上传。
+      operationId: storageUploadOnce
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StorageUploadOnceForm'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiStorageUploadOnceResp'
+  /openapi/v1/storage/upload/once/pic:
+    post:
+      tags:
+        - Storage
+      summary: 图片上传
+      description: |
+        上传图片文件，服务端自动存储原图并生成 400×400 自适应裁剪缩略图，响应同时返回原图与缩略图信息。
+        请求体为 `multipart/form-data`，包含 `data`（图片文件）和 `json`（JSON 参数字符串）两个字段。
+      operationId: storageUploadOncePic
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StorageUploadOncePicForm'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiStorageUploadOncePicResp'
+  /openapi/v1/storage/upload/onceaudio/notrans:
+    post:
+      tags:
+        - Storage
+      summary: 音频上传（不转码）
+      description: |
+        上传音频文件，不做转码处理，直接存储原始音频。
+        请求体为 `multipart/form-data`，包含 `data`（音频文件）和 `json`（JSON 参数字符串）两个字段。
+      operationId: storageUploadOnceAudioNotrans
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StorageUploadOnceAudioForm'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiStorageUploadOnceResp'
   /openapi/v1/usage:
     post:
       tags:
@@ -966,3 +1036,138 @@ components:
           type: string
         source:
           type: string
+    StorageUploadOnceForm:
+      type: object
+      description: 通用文件上传表单
+      properties:
+        data:
+          type: string
+          format: binary
+          description: 上传的文件
+        json:
+          type: string
+          description: |
+            JSON 字符串，字段如下：
+            - `busstype` (string, 必填): 业务类型
+            - `storagetype` (int, 可选): 存储类型，1=大文件上传，其他=普通上传
+            - `action` (int, 可选): 操作类型
+            - `h_src` (int, 可选): 来源
+            - `h_lc` (string, 可选): 语言代码
+          example: '{"busstype":"avatar","storagetype":0}'
+      required:
+        - data
+        - json
+    StorageUploadOncePicForm:
+      type: object
+      description: 图片上传表单
+      properties:
+        data:
+          type: string
+          format: binary
+          description: 上传的图片文件
+        json:
+          type: string
+          description: |
+            JSON 字符串，字段如下：
+            - `busstype` (string, 必填): 业务类型
+            - `h_src` (int, 可选): 来源
+            - `h_lc` (string, 可选): 语言代码
+          example: '{"busstype":"avatar"}'
+      required:
+        - data
+        - json
+    StorageUploadOnceAudioForm:
+      type: object
+      description: 音频上传表单（不转码）
+      properties:
+        data:
+          type: string
+          format: binary
+          description: 上传的音频文件
+        json:
+          type: string
+          description: |
+            JSON 字符串，字段如下：
+            - `busstype` (string, 必填): 业务类型
+            - `format` (string, 可选): 音频格式
+            - `trans_format` (int, 可选): 转码格式
+            - `h_src` (int, 可选): 来源
+            - `h_lc` (string, 可选): 语言代码
+          example: '{"busstype":"voice","format":"mp3"}'
+      required:
+        - data
+        - json
+    StorageUploadData:
+      type: object
+      description: 文件/音频上传成功返回数据
+      properties:
+        uri:
+          type: string
+          description: 文件 URI
+        md5:
+          type: string
+          description: 文件 MD5
+        url:
+          type: string
+          description: 文件访问 URL
+        meta:
+          type: object
+          description: 媒体元信息（可选）
+    StorageUploadPicData:
+      type: object
+      description: 图片上传成功返回数据（原图 + 缩略图）
+      properties:
+        origin:
+          type: object
+          description: 原图信息
+          properties:
+            url:
+              type: string
+            md5:
+              type: string
+            w:
+              type: integer
+              description: 宽度（像素）
+            h:
+              type: integer
+              description: 高度（像素）
+        tiny:
+          type: object
+          description: 缩略图信息（400×400 自适应裁剪）
+          properties:
+            url:
+              type: string
+            md5:
+              type: string
+            w:
+              type: integer
+              description: 宽度（像素）
+            h:
+              type: integer
+              description: 高度（像素）
+    ApiStorageUploadOnceResp:
+      type: object
+      description: 文件/音频上传响应
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          $ref: '#/components/schemas/StorageUploadData'
+    ApiStorageUploadOncePicResp:
+      type: object
+      description: 图片上传响应
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          $ref: '#/components/schemas/StorageUploadPicData'
