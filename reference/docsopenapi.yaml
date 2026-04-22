@@ -267,28 +267,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
-  /openapi/v1/storage/upload/once:
-    post:
-      tags:
-        - Storage
-      summary: 文件上传
-      description: |
-        通用文件上传接口。请求体为 `multipart/form-data`，仅包含 `data`（文件）字段，业务参数由服务端自动设置。
-        使用大文件上传通道。
-      operationId: storageUploadOnce
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/StorageUploadFileForm'
-      responses:
-        '200':
-          description: JSON 业务响应
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiStorageUploadOnceResp'
+  /openapi/v1/storage/upload/once: {}
   /openapi/v1/storage/upload/once/pic:
     post:
       tags:
