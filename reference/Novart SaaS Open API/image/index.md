@@ -1,4 +1,4 @@
 ---
 title: Image
-hidden: true
+hidden: false
 ---
