@@ -229,6 +229,74 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+  /openapi/v1/video/generate:
+    post:
+      tags:
+        - Video
+      summary: 视频生成（文生 / 图生 / 首尾帧 / 多参考媒体）
+      description: >
+        异步任务；状态走 `/openapi/v1/work/status`，结果走 webhook。
+
+        `model` 各能力差异以服务端注册表为准（duration / ratio / resolution / reference_*
+        上限按模型而定）。
+      operationId: openVideoGenerate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenVideoGenerateBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+  /openapi/v1/video/extend:
+    post:
+      tags:
+        - Video
+      summary: 视频延长（在源视频末尾追加 N 秒）
+      description: |
+        源视频二选一：`workspace_id`（内部）或 `video_url`（外部）；同时传 / 同时空均报错。
+        `duration` 为增量秒数：原 8s + duration=4 → 输出 12s。
+      operationId: openVideoExtend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenVideoExtendBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+  /openapi/v1/video/edit:
+    post:
+      tags:
+        - Video
+      summary: 视频编辑
+      description: |
+        源视频二选一：`workspace_id` 或 `video_url`；同时传 / 同时空均报错。
+        `mask_url` 可选；非空时为局部编辑掩码（模型支持度以服务端为准，不支持的模型 + 非空 mask_url 报错）。
+      operationId: openVideoEdit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenVideoEditBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
   /openapi/v1/video/analyze:
     post:
       tags:
@@ -381,6 +449,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+  /openapi/v1/work/batch-status:
+    post:
+      tags:
+        - Work
+      summary: 批量查询异步任务状态
+      operationId: openBatchGetWorkStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenBatchGetWorkStatusBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenBatchWorkEnt'
   /openapi/v1/work/status:
     post:
       tags:
@@ -459,8 +546,32 @@ components:
 
         文生图：`image_urls` 为空；图片编辑：`image_urls` 非空。
 
-        `seedream-*-seq`、`grok-imagine-image` 仅支持编辑；`grok-2-image`
-        仅支持文生图；其余以服务端校验为准。
+
+        **模式支持**：
+
+        - 仅文生图：`grok-2-image`
+
+        - 仅编辑：`seedream-4.5-seq`、`seedream-5.0-lite-seq`、`grok-imagine-image`
+
+        - 文生 +
+        编辑：`nanobanana-pro`、`nano-banana-2`、`nano-banana-2-fast`、`seedream-4.5`、`seedream-5.0-lite`、`gpt-image-2`
+
+
+        **参数支持（按模型不同）**：
+
+        - `ratio` 支持值因模型而异：
+          - `nanobanana-pro` / `nano-banana-2` / `nano-banana-2-fast`: `16:9` / `1:1` / `9:16` / `21:9` / `2:3` / `3:2`
+          - `seedream-4.5` / `seedream-4.5-seq` / `seedream-5.0-lite` / `seedream-5.0-lite-seq`: `16:9` / `1:1` / `9:16` / `2:3` / `3:2`
+          - `gpt-image-2`: `1:1` / `3:2` / `2:3` / `3:4` / `4:3` / `4:5` / `5:4` / `9:16` / `16:9` / `21:9`
+          - `grok-2-image` / `grok-imagine-image`: 不校验
+        - `resolution` 仅以下模型支持，且取值集不同：
+          - `nanobanana-pro`: `1k` / `2k` / `4k` / `8k`
+          - `nano-banana-2`: `0.5k` / `1k` / `2k` / `4k`
+          - `nano-banana-2-fast`: `2k` / `4k`
+          - `gpt-image-2`: `1k` / `2k`
+        - `quality` 仅 `gpt-image-2` 支持，取值：`low` / `medium` / `high`
+
+        - `num_images` 仅 `seedream-4.5-seq` / `seedream-5.0-lite-seq` 支持，上限 15
       properties:
         prompt:
           type: string
@@ -474,17 +585,58 @@ components:
         model:
           type: string
           example: nanobanana-pro
-          description: >
-            可选。默认等价 `nanobanana-pro`。可选值（完整列表）：nanobanana-pro | nano-banana-2 |
-            nano-banana-2-fast | seedream-4.5 | seedream-4.5-seq |
-            seedream-5.0-lite | seedream-5.0-lite-seq | gpt-image-1.5 |
-            grok-2-image | grok-imagine-image
+          enum:
+            - nanobanana-pro
+            - nano-banana-2
+            - nano-banana-2-fast
+            - seedream-4.5
+            - seedream-4.5-seq
+            - seedream-5.0-lite
+            - seedream-5.0-lite-seq
+            - gpt-image-2
+            - grok-2-image
+            - grok-imagine-image
+          description: 可选。默认 `nanobanana-pro`。
         ratio:
           type: string
           example: '9:16'
+          description: 取值集因 model 而异，详见请求体描述。
+          enum:
+            - '1:1'
+            - '3:2'
+            - '2:3'
+            - '3:4'
+            - '4:3'
+            - '4:5'
+            - '5:4'
+            - '16:9'
+            - '9:16'
+            - '21:9'
         resolution:
           type: string
           example: 2k
+          description: >
+            仅 `nanobanana-pro` / `nano-banana-2` / `nano-banana-2-fast` /
+            `gpt-image-2` 支持；取值集详见请求体描述。
+          enum:
+            - 0.5k
+            - 1k
+            - 2k
+            - 4k
+            - 8k
+        quality:
+          type: string
+          description: 仅 `gpt-image-2` 支持。
+          enum:
+            - low
+            - medium
+            - high
+        num_images:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 15
+          description: 仅 `seedream-4.5-seq` / `seedream-5.0-lite-seq` 支持，单次输出图片数量。
         concurrency:
           type: integer
           format: int32
@@ -696,6 +848,185 @@ components:
         callback_id:
           type: string
           description: 自定义追踪 ID，webhook URL 后台配置
+    OpenVideoGenerateBody:
+      type: object
+      description: >
+        视频生成。文生视频时 `start_frame` / `end_frame` / `reference_*` 留空；
+
+        图生视频时通过 `start_frame`（可叠加 `end_frame`）控制首尾帧；多参考媒体由 `reference_images` /
+        `reference_videos` / `reference_audios` 携带。
+
+
+        **各模型规则**（取值集与上限按模型而定，服务端校验为准）：
+
+
+        | model | duration | resolution | ratio | start/end_frame |
+        reference_images | reference_videos | reference_audios | 备注 |
+
+        |---|---|---|---|---|---|---|---|---|
+
+        | `veo-3.1` | 4/6/8（默认 8） | 720p / 1080p / 4k | 16:9 / 9:16 | ≤2 | 无上限 |
+        — | — | frame 与 reference 互斥 |
+
+        | `kling-3.0` | 3~15（默认 8） | — | — | ≤2 | ≤1 | — | — | |
+
+        | `grok` | 6/10（默认 6） | — | — | 不支持 | ≤1（作为首帧使用） | — | — | |
+
+        | `seedance-2.0` | 4~15（默认 15） | 720p / 1080p | — | ≤2 | ≤9 | ≤3 | ≤3 |
+        frame 与 reference 互斥；audio 需配 image/video |
+
+        | `happyhorse-1.0` | 3~15（默认 5） | 720p / 1080p | 16:9 / 9:16 / 1:1 / 4:3
+        / 3:4 | ≤1 | ≤9 | ≤1（有视频时图片改限 ≤5） | — | frame 与 reference 互斥 |
+      properties:
+        prompt:
+          type: string
+        model:
+          type: string
+          example: veo-3.1
+          enum:
+            - veo-3.1
+            - kling-3.0
+            - grok
+            - seedance-2.0
+            - happyhorse-1.0
+          description: 模型短名称，省略时走服务端默认。
+        ratio:
+          type: string
+          example: '16:9'
+          description: 取值集因 model 而异，详见请求体表格。
+          enum:
+            - '16:9'
+            - '9:16'
+            - '1:1'
+            - '4:3'
+            - '3:4'
+        duration:
+          type: integer
+          format: int32
+          description: 视频时长（秒）。取值集 / 范围因 model 而异，详见请求体表格。
+        resolution:
+          type: string
+          example: 1080p
+          description: 仅部分模型支持；取值集因 model 而异，详见请求体表格。
+          enum:
+            - 720p
+            - 1080p
+            - 4k
+        start_frame:
+          type: string
+          description: 首帧图片 URL
+        end_frame:
+          type: string
+          description: 尾帧图片 URL
+        reference_images:
+          type: array
+          items:
+            type: string
+        reference_videos:
+          type: array
+          items:
+            type: string
+        reference_audios:
+          type: array
+          items:
+            type: string
+        callback_id:
+          type: string
+          description: 自定义追踪 ID，webhook URL 后台配置
+        idempotency_key:
+          type: string
+          description: 幂等键，相同 key 重复请求复用同一任务
+    OpenVideoExtendBody:
+      type: object
+      description: >
+        视频延长。源视频二选一：`workspace_id`（内部）或 `video_url`（外部）；同时传 / 同时空均报错。
+
+        `duration` 为增量秒数。`model` / `ratio` / `resolution` 取值集与
+        `/openapi/v1/video/generate` 相同（详见该接口表格），服务端校验为准。
+      properties:
+        workspace_id:
+          type: string
+        video_url:
+          type: string
+        prompt:
+          type: string
+        duration:
+          type: integer
+          format: int32
+          description: 在源视频末尾追加的秒数；取值范围按 model 而定。
+        model:
+          type: string
+          enum:
+            - veo-3.1
+            - kling-3.0
+            - grok
+            - seedance-2.0
+            - happyhorse-1.0
+        ratio:
+          type: string
+          enum:
+            - '16:9'
+            - '9:16'
+            - '1:1'
+            - '4:3'
+            - '3:4'
+        resolution:
+          type: string
+          enum:
+            - 720p
+            - 1080p
+            - 4k
+        callback_id:
+          type: string
+          description: 自定义追踪 ID，webhook URL 后台配置
+        idempotency_key:
+          type: string
+    OpenVideoEditBody:
+      type: object
+      description: |
+        视频编辑。源视频二选一：`workspace_id` 或 `video_url`；同时传 / 同时空均报错。
+        `mask_url` 可选；非空时为局部编辑掩码（模型支持度以服务端为准）。
+        `model` / `ratio` / `resolution` 取值集与 `/openapi/v1/video/generate` 相同。
+      properties:
+        workspace_id:
+          type: string
+        video_url:
+          type: string
+        prompt:
+          type: string
+        mask_url:
+          type: string
+        reference_images:
+          type: array
+          items:
+            type: string
+        model:
+          type: string
+          enum:
+            - veo-3.1
+            - kling-3.0
+            - grok
+            - seedance-2.0
+            - happyhorse-1.0
+        ratio:
+          type: string
+          enum:
+            - '16:9'
+            - '9:16'
+            - '1:1'
+            - '4:3'
+            - '3:4'
+        resolution:
+          type: string
+          enum:
+            - 720p
+            - 1080p
+            - 4k
+        callback_id:
+          type: string
+          description: 自定义追踪 ID，webhook URL 后台配置
+        idempotency_key:
+          type: string
     OpenVideoAnalyzeBody:
       type: object
       description: 视频拉片任务。
@@ -822,6 +1153,22 @@ components:
         callback_id:
           type: string
           description: 自定义追踪 ID，webhook URL 后台配置
+    OpenBatchGetWorkStatusBody:
+      type: object
+      description: 批量按 `workspace_ids` 查询异步任务状态。
+      properties:
+        workspace_ids:
+          type: array
+          items:
+            type: string
+    OpenBatchGetWorkStatusData:
+      type: object
+      description: 批量异步任务状态返回。
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenWorkData'
     OpenGetWorkStatusBody:
       type: object
       description: 按 `workspace_id` 查询异步任务状态。
@@ -1070,6 +1417,21 @@ components:
           properties:
             ent:
               $ref: '#/components/schemas/OpenAiActorSayData'
+    ApiSuccessOpenBatchWorkEnt:
+      type: object
+      required:
+        - ret
+      properties:
+        ret:
+          type: integer
+          example: 1
+        msg:
+          type: string
+        data:
+          type: object
+          properties:
+            ent:
+              $ref: '#/components/schemas/OpenBatchGetWorkStatusData'
     ApiSuccessOpenWorkEnt:
       type: object
       required:
