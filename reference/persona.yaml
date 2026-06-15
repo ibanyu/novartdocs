@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
-  title: Novart SaaS Open API
+  title: AdsTurbo Open API
   description: >
-    Novart SaaS Open API 文档，所有接口路径以 `/openapi/v1/` 开头。
+    AdsTurbo Open API 文档，所有接口路径以 `/openapi/v1/` 开头。
 
 
     **Base URL**：`https://www.adsturbo.ai/klian/novartapi`
 
 
-    **认证**：除「用量查询」外，均使用 **HTTP Bearer**（RFC 6750）：请求头 `Authorization: Bearer
+    **认证**：使用 **HTTP Bearer**（RFC 6750）：请求头 `Authorization: Bearer
     <token>`，`<token>` 为在 [www.adsturbo.ai](https://www.adsturbo.ai) 控制台创建的 API
-    Key。用量接口为站内会话鉴权，见该路径说明（不使用本 Bearer 方案）。
+    Key。
 
 
     **请求体**：`Content-Type: application/json`
@@ -37,8 +37,6 @@ tags:
     description: 视频工具
   - name: Work
     description: 异步任务状态
-  - name: Usage
-    description: 用量查询
 security:
   - bearerAuth: []
 paths:
@@ -508,29 +506,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
-  /openapi/v1/usage:
-    post:
-      tags:
-        - Usage
-      summary: 用量查询（已停用）
-      deprecated: true
-      description: |
-        站内登录会话鉴权。**不要**携带 `Authorization: Bearer ...`；请求体需含会话 `token` 及标准头字段。
-      operationId: openGetUsage
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OpenGetUsageBody'
-      responses:
-        '200':
-          description: JSON 业务响应
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSuccessOpenUsageEnt'
 components:
   securitySchemes:
     bearerAuth:
@@ -1186,24 +1161,6 @@ components:
       properties:
         actor_id:
           type: string
-    OpenGetUsageBody:
-      type: object
-      description: 用量分页与可选时间区间筛选。
-      properties:
-        offset:
-          type: integer
-          format: int32
-        limit:
-          type: integer
-          format: int32
-        timestamps:
-          type: array
-          items:
-            type: integer
-            format: int64
-          description: >
-            可选。秒级 Unix 时间戳；非空时取 [min,max] 作为时间区间——明细筛该区间；statistic
-            对该区间内每个日历日聚合。空则明细不筛、statistic 为最近 7 天。
     ImageCreateData:
       type: object
       description: 图片生成结果（图片 URL 与关联任务 ID）。
@@ -1325,58 +1282,6 @@ components:
         created_at:
           type: integer
           format: int64
-    OpenUsageItem:
-      type: object
-      properties:
-        biz_type:
-          type: string
-          description: 业务类型：ad_clone, ai_actor, promo_video 等
-        amount:
-          type: number
-          format: float
-          description: 积分数
-        timestamp:
-          type: integer
-          format: int64
-        remark:
-          type: string
-        direction:
-          type: string
-        api_key:
-          type: string
-          description: 触发来源的 API Key 标识（空=Web 端）
-    OpenUsageByDay:
-      type: object
-      description: 按日历日汇总的用量。
-      properties:
-        date:
-          type: string
-        amount:
-          type: integer
-          format: int32
-    OpenUsageData:
-      type: object
-      description: 剩余积分、用量明细与按日统计。
-      properties:
-        has_more:
-          type: boolean
-        remaining_credits:
-          type: integer
-          format: int32
-          description: 剩余积分
-        used_credits:
-          type: integer
-          format: int32
-          description: 已使用积分
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/OpenUsageItem'
-        statistic:
-          type: array
-          items:
-            $ref: '#/components/schemas/OpenUsageByDay'
-          description: 按天消耗；请求带 timestamps 时为该区间内每日，否则最近 7 日
     ApiSuccessImageCreateEnt:
       type: object
       required:
@@ -1512,21 +1417,6 @@ components:
           properties:
             ent:
               $ref: '#/components/schemas/OpenAdCloneAnalyzeData'
-    ApiSuccessOpenUsageEnt:
-      type: object
-      required:
-        - ret
-      properties:
-        ret:
-          type: integer
-          example: 1
-        msg:
-          type: string
-        data:
-          type: object
-          properties:
-            ent:
-              $ref: '#/components/schemas/OpenUsageData'
     OpenAiActorInfo:
       type: object
       description: 系统演员信息
