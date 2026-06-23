@@ -9,7 +9,7 @@ icon: icon-book1
 ---
 AdsTurbo Open API lets you create images, generate and edit videos, run AI Actor workflows, manage Personas, recreate ads with AdClone, and check asynchronous task status.
 
-Chinese endpoint pages are linked from the matching English endpoint pages.
+Chinese API Reference: [查看中文接口文档](/reference/zhsaasimagecreate). Each English endpoint page also links to its matching Chinese endpoint page.
 
 ## Base URL
 
