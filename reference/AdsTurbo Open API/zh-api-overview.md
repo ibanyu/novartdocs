@@ -6,6 +6,8 @@ hidden: false
 
 AdsTurbo Open API 可用于图片生成、视频生成与编辑、AI Actor、Persona、AdClone，以及异步任务状态查询。
 
+英文文档：[View English API Reference](/reference/api-overview)。每个中文接口详情页也会链接回对应的英文接口详情页。
+
 ## Base URL
 
 ```text
