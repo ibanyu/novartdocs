@@ -2,7 +2,7 @@
 title: API Overview
 excerpt: >-
   Start here for AdsTurbo Open API authentication, async jobs, and response
-  handling.
+  handling. Chinese API Reference: [查看中文接口文档](/reference/zhsaasimagecreate).
 api_config: getting-started
 hidden: false
 icon: icon-book1
