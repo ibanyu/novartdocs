@@ -2,41 +2,46 @@ openapi: 3.0.3
 info:
   title: AdsTurbo Open API
   description: >
-    AdsTurbo Open API 文档，所有接口路径以 `/openapi/v1/` 开头。
+    AdsTurbo Open API documentation. All endpoints are under `/openapi/v1/`.
 
 
-    **Base URL**：`https://www.adsturbo.ai/klian/novartapi`
+    **Chinese version**: [查看中文 API 文档](/reference/zh-api-overview)
 
 
-    **认证**：使用 **HTTP Bearer**（RFC 6750）：请求头 `Authorization: Bearer
-    <token>`，`<token>` 为在 [www.adsturbo.ai](https://www.adsturbo.ai) 控制台创建的 API
-    Key。
+    **Base URL**: `https://www.adsturbo.ai/klian/novartapi`
 
 
-    **请求体**：`Content-Type: application/json`
+    **Authentication**: Use **HTTP Bearer** (RFC 6750). Send `Authorization:
+    Bearer <token>`, where `<token>` is the API key created in the [AdsTurbo
+    console](https://www.adsturbo.ai).
 
 
-    **成功响应**：HTTP 200，JSON 格式 `{ "ret": 1, "data": { "ent": <业务数据> } }`
+    **Request body**: `Content-Type: application/json`
 
 
-    **业务错误**：HTTP 200，`ret` 不为 1 时见 `msg` 字段说明。
+    **Success response**: HTTP 200 with `{ "ret": 1, "data": { "ent": <business
+    data> } }`
+
+
+    **Business errors**: HTTP 200 may still contain `ret` other than `1`. Read
+    `msg` for the error reason.
   version: 1.0.0
 servers:
   - url: https://www.adsturbo.ai/klian/novartapi
-    description: API 服务地址
+    description: API base URL
 tags:
   - name: Image
-    description: 图片创作
+    description: Image creation and editing
   - name: AiActor
-    description: 系统演员
+    description: System actor workflows
   - name: Persona
-    description: 自定义 Persona
+    description: Custom Persona workflows
   - name: AdClone
-    description: 视频复刻 AdClone
+    description: AdClone video recreation
   - name: Video
-    description: 视频工具
+    description: Video generation and editing tools
   - name: Work
-    description: 异步任务状态
+    description: Async task status
 security:
   - bearerAuth: []
 paths:
@@ -44,7 +49,7 @@ paths:
     post:
       tags:
         - Image
-      summary: 用户创作图片
+      summary: Create or edit images
       operationId: saasImageCreate
       requestBody:
         required: true
@@ -54,9 +59,9 @@ paths:
               $ref: '#/components/schemas/ImageCreateBody'
             examples:
               basic:
-                summary: 基本示例
+                summary: Basic example
                 value:
-                  prompt: 生成一个亚洲小朋友，骑着一只泰迪狗，狗有翅膀，动漫类型
+                  prompt: Create an anime-style Asian child riding a winged teddy dog
                   model: nanobanana-pro
                   image_urls: []
                   ratio: '9:16'
@@ -65,16 +70,22 @@ paths:
                   sync_mod: false
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessImageCreateEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhsaasimagecreate)
+
+
+        Create a new image from a text prompt, or edit one or more input images
+        depending on the selected model.
   /openapi/v1/aiactor/list:
     post:
       tags:
         - AiActor
-      summary: 系统演员列表
+      summary: List system actors
       operationId: openAiActorList
       requestBody:
         required: true
@@ -84,16 +95,20 @@ paths:
               $ref: '#/components/schemas/OpenAiActorListBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenAiActorListEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenaiactorlist)
+
+        Return available system actors with optional filters and pagination.
   /openapi/v1/aiactor/say:
     post:
       tags:
         - AiActor
-      summary: 系统演员语音生成
+      summary: Generate system actor speech
       operationId: openAiActorSay
       requestBody:
         required: true
@@ -103,19 +118,28 @@ paths:
               $ref: '#/components/schemas/OpenAiActorSayBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenAiActorSayEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenaiactorsay)
+
+        Generate speech audio with a system actor voice.
   /openapi/v1/aiactor/perform:
     post:
       tags:
         - AiActor
         - Persona
-      summary: 演员演出（系统演员或 Persona）
-      description: |
-        `actor_id` 既可为系统演员 ID，也可为自定义 Persona 的 `actor_id`，共用同一套演出参数与异步任务响应。
+      summary: Generate an actor performance
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenaiactorperform)
+
+
+        `actor_id` may be either a system actor ID or a custom Persona
+        `actor_id`. Both use the same performance parameters and async task
+        response.
       operationId: openAiActorPerform
       requestBody:
         required: true
@@ -125,7 +149,7 @@ paths:
               $ref: '#/components/schemas/OpenAiActorPerformBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
@@ -134,7 +158,7 @@ paths:
     post:
       tags:
         - Persona
-      summary: 创建自定义 Persona
+      summary: Create a custom Persona
       operationId: openPersonaCreate
       requestBody:
         required: true
@@ -144,16 +168,20 @@ paths:
               $ref: '#/components/schemas/OpenPersonaCreateBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenpersonacreate)
+
+        Create a custom Persona from a portrait image and optional voice sample.
   /openapi/v1/persona/delete:
     post:
       tags:
         - Persona
-      summary: 删除自定义 Persona
+      summary: Delete a custom Persona
       operationId: openPersonaDelete
       requestBody:
         required: true
@@ -163,18 +191,24 @@ paths:
               $ref: '#/components/schemas/OpenPersonaDeleteBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaDeleteEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenpersonadelete)
+
+        Delete a custom Persona owned by the current API key.
   /openapi/v1/persona/list:
     post:
       tags:
         - Persona
-      summary: 个人创建演员列表
-      description: |
-        分页查询当前用户创建的个人演员（Persona）列表。
+      summary: List personal actors
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenpersonallist)
+
+        List custom Personas created by the current user with pagination.
       operationId: openPersonalList
       requestBody:
         required: true
@@ -184,7 +218,7 @@ paths:
               $ref: '#/components/schemas/OpenPersonalListBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
@@ -193,7 +227,7 @@ paths:
     post:
       tags:
         - AdClone
-      summary: 视频复刻 — 分析
+      summary: Analyze an ad video
       operationId: openAdCloneAnalyze
       requestBody:
         required: true
@@ -203,16 +237,22 @@ paths:
               $ref: '#/components/schemas/OpenAdCloneAnalyzeBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenAdCloneAnalyzeEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenadcloneanalyze)
+
+
+        Analyze a source ad video clip and return a prompt plus a reusable video
+        segment.
   /openapi/v1/adclone/generate:
     post:
       tags:
         - AdClone
-      summary: 视频复刻 — 生成
+      summary: Generate an ad clone video
       operationId: openAdCloneGenerate
       requestBody:
         required: true
@@ -222,21 +262,29 @@ paths:
               $ref: '#/components/schemas/OpenAdCloneGenerateBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenadclonegenerate)
+
+
+        Submit an AdClone generation task using a prompt and source video
+        segment.
   /openapi/v1/video/generate:
     post:
       tags:
         - Video
-      summary: 视频生成（文生 / 图生 / 首尾帧 / 多参考媒体）
-      description: >
-        异步任务；状态走 `/openapi/v1/work/status`，结果走 webhook。
+      summary: Generate a video
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenvideogenerate)
 
-        `model` 各能力差异以服务端注册表为准（duration / ratio / resolution / reference_*
-        上限按模型而定）。
+
+        Asynchronous task. Query status with `/openapi/v1/work/status`; final
+        results are delivered by webhook when configured. Model capabilities
+        differ by `duration`, `ratio`, `resolution`, and reference media limits.
       operationId: openVideoGenerate
       requestBody:
         required: true
@@ -246,7 +294,7 @@ paths:
               $ref: '#/components/schemas/OpenVideoGenerateBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
@@ -255,11 +303,15 @@ paths:
     post:
       tags:
         - Video
-      summary: 视频延长（在源视频末尾追加 N 秒）
-      description: |
-        **仅支持 `seedance-2.0` 模型基座**。
-        源视频二选一：`workspace_id`（内部）或 `video_url`（外部）；同时传 / 同时空均报错。
-        `duration` 为增量秒数：原 8s + duration=4 → 输出 12s。
+      summary: Extend a video
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenvideoextend)
+
+
+        **Only the `seedance-2.0` model base is supported.** Provide either
+        `workspace_id` for an internal source video or `video_url` for an
+        external source video. `duration` is the number of seconds appended to
+        the end of the source video.
       operationId: openVideoExtend
       requestBody:
         required: true
@@ -269,7 +321,7 @@ paths:
               $ref: '#/components/schemas/OpenVideoExtendBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
@@ -278,11 +330,14 @@ paths:
     post:
       tags:
         - Video
-      summary: 视频编辑
-      description: |
-        **仅支持 `seedance-2.0` 模型基座**。
-        源视频二选一：`workspace_id` 或 `video_url`；同时传 / 同时空均报错。
-        `mask_url` 可选；非空时为局部编辑掩码。
+      summary: Edit a video
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenvideoedit)
+
+
+        **Only the `seedance-2.0` model base is supported.** Provide either
+        `workspace_id` or `video_url`. `mask_url` is optional and enables local
+        editing when supported by the model.
       operationId: openVideoEdit
       requestBody:
         required: true
@@ -292,7 +347,7 @@ paths:
               $ref: '#/components/schemas/OpenVideoEditBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
@@ -301,7 +356,7 @@ paths:
     post:
       tags:
         - Video
-      summary: 视频拉片
+      summary: Analyze a video
       operationId: openVideoAnalyze
       requestBody:
         required: true
@@ -311,16 +366,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoAnalyzeBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideoanalyze)
+
+        Submit a video analysis task.
   /openapi/v1/video/lipsync:
     post:
       tags:
         - Video
-      summary: 视频对口型
+      summary: Lip sync a video
       operationId: openVideoLipSync
       requestBody:
         required: true
@@ -330,16 +389,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoLipSyncBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideolipsync)
+
+        Submit a video lip sync task.
   /openapi/v1/video/inpaint:
     post:
       tags:
         - Video
-      summary: 视频水印消除
+      summary: Remove video watermarks
       operationId: openVideoInpaint
       requestBody:
         required: true
@@ -349,16 +412,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoInpaintBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideoinpaint)
+
+        Submit a video watermark removal task.
   /openapi/v1/video/translate:
     post:
       tags:
         - Video
-      summary: 视频翻译
+      summary: Translate a video
       operationId: openVideoTranslate
       requestBody:
         required: true
@@ -368,16 +435,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoTranslateBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideotranslate)
+
+        Submit a video translation task.
   /openapi/v1/video/upscale:
     post:
       tags:
         - Video
-      summary: 视频超分
+      summary: Upscale a video
       operationId: openVideoUpscale
       requestBody:
         required: true
@@ -387,16 +458,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoUpscaleBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideoupscale)
+
+        Submit a video upscaling task.
   /openapi/v1/video/character-swap:
     post:
       tags:
         - Video
-      summary: 视频换脸
+      summary: Swap a video character
       operationId: openVideoCharacterSwap
       requestBody:
         required: true
@@ -406,16 +481,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoCharacterSwapBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideocharacterswap)
+
+        Submit a video character or face swap task.
   /openapi/v1/video/motion-control:
     post:
       tags:
         - Video
-      summary: 视频动作控制
+      summary: Control video motion
       operationId: openVideoMotionControl
       requestBody:
         required: true
@@ -425,16 +504,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoMotionControlBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideomotioncontrol)
+
+        Submit a motion control task for a source video and character reference.
   /openapi/v1/video/subtitle:
     post:
       tags:
         - Video
-      summary: 视频字幕
+      summary: Generate video subtitles
       operationId: openVideoSubtitle
       requestBody:
         required: true
@@ -444,16 +527,20 @@ paths:
               $ref: '#/components/schemas/OpenVideoSubtitleBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenvideosubtitle)
+
+        Submit a video subtitle generation task.
   /openapi/v1/work/batch-status:
     post:
       tags:
         - Work
-      summary: 批量查询异步任务状态
+      summary: Batch query async task status
       operationId: openBatchGetWorkStatus
       requestBody:
         required: true
@@ -463,16 +550,20 @@ paths:
               $ref: '#/components/schemas/OpenBatchGetWorkStatusBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenBatchWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopenbatchgetworkstatus)
+
+        Query multiple async tasks by `workspace_ids`.
   /openapi/v1/work/status:
     post:
       tags:
         - Work
-      summary: 查询异步任务状态
+      summary: Query async task status
       operationId: openGetWorkStatus
       requestBody:
         required: true
@@ -482,16 +573,20 @@ paths:
               $ref: '#/components/schemas/OpenGetWorkStatusBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopengetworkstatus)
+
+        Query one async task by `workspace_id`.
   /openapi/v1/persona/status:
     post:
       tags:
         - Persona
-      summary: 查询 Persona 状态
+      summary: Query Persona status
       operationId: openGetPersonaStatus
       requestBody:
         required: true
@@ -501,11 +596,15 @@ paths:
               $ref: '#/components/schemas/OpenGetPersonaStatusBody'
       responses:
         '200':
-          description: JSON 业务响应
+          description: JSON business response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSuccessOpenPersonaEnt'
+      description: |-
+        > 中文版本: [查看中文文档](/reference/zhopengetpersonastatus)
+
+        Query Persona processing status by `actor_id`.
 components:
   securitySchemes:
     bearerAuth:
@@ -518,47 +617,45 @@ components:
   schemas:
     ImageCreateBody:
       type: object
-      description: >
-        图片生成或编辑。`model` 为模型短名称，省略时服务端默认 `nanobanana-pro`。
+      description: >-
+        Create or edit images. `model` is the short model name. If omitted, the
+        server defaults to `nanobanana-pro`.
 
-        文生图：`image_urls` 为空；图片编辑：`image_urls` 非空。
-
-
-        **模式支持**：
-
-        - 仅文生图：`grok-2-image`
-
-        - 仅编辑：`seedream-4.5-seq`、`seedream-5.0-lite-seq`、`grok-imagine-image`
-
-        - 文生 +
-        编辑：`nanobanana-pro`、`nano-banana-2`、`nano-banana-2-fast`、`seedream-4.5`、`seedream-5.0-lite`、`gpt-image-2`
+        For text-to-image, send an empty `image_urls` array. For image editing,
+        send one or more `image_urls`.
 
 
-        **参数支持（按模型不同）**：
+        **Mode support**:
 
-        - `ratio` 支持值因模型而异：
-          - `nanobanana-pro` / `nano-banana-2` / `nano-banana-2-fast`: `16:9` / `1:1` / `9:16` / `21:9` / `2:3` / `3:2`
-          - `seedream-4.5` / `seedream-4.5-seq` / `seedream-5.0-lite` / `seedream-5.0-lite-seq`: `16:9` / `1:1` / `9:16` / `2:3` / `3:2`
-          - `gpt-image-2`: `1:1` / `3:2` / `2:3` / `3:4` / `4:3` / `4:5` / `5:4` / `9:16` / `16:9` / `21:9`
-          - `grok-2-image` / `grok-imagine-image`: 不校验
-        - `resolution` 仅以下模型支持，且取值集不同：
-          - `nanobanana-pro`: `1k` / `2k` / `4k` / `8k`
-          - `nano-banana-2`: `0.5k` / `1k` / `2k` / `4k`
-          - `nano-banana-2-fast`: `2k` / `4k`
-          - `gpt-image-2`: `1k` / `2k`
-        - `quality` 仅 `gpt-image-2` 支持，取值：`low` / `medium` / `high`
+        - Text-to-image only: `grok-2-image`
 
-        - `num_images` 仅 `seedream-4.5-seq` / `seedream-5.0-lite-seq` 支持，上限 15
+        - Editing only: `seedream-4.5-seq`, `seedream-5.0-lite-seq`,
+        `grok-imagine-image`
+
+        - Text-to-image + editing: `nanobanana-pro`, `nano-banana-2`,
+        `nano-banana-2-fast`, `seedream-4.5`, `seedream-5.0-lite`, `gpt-image-2`
+
+
+        **Model-specific parameters**:
+
+        - Supported `ratio` values vary by model.
+
+        - `resolution` is supported only by `nanobanana-pro`, `nano-banana-2`,
+        `nano-banana-2-fast`, and `gpt-image-2`.
+
+        - `quality` is supported only by `gpt-image-2`.
+
+        - `num_images` is supported only by `seedream-4.5-seq` and
+        `seedream-5.0-lite-seq`, with a maximum of 15.
       properties:
         prompt:
           type: string
-          description: 文生图提示词
+          description: Text prompt for image generation.
         image_urls:
           type: array
           items:
             type: string
-          description: |
-            文生图时为空数组；编辑时非空。
+          description: Empty for text-to-image. Non-empty for image editing.
         model:
           type: string
           example: nanobanana-pro
@@ -573,11 +670,11 @@ components:
             - gpt-image-2
             - grok-2-image
             - grok-imagine-image
-          description: 可选。默认 `nanobanana-pro`。
+          description: Optional. Defaults to `nanobanana-pro`.
         ratio:
           type: string
           example: '9:16'
-          description: 取值集因 model 而异，详见请求体描述。
+          description: Supported values vary by model. See the request body description.
           enum:
             - '1:1'
             - '3:2'
@@ -592,9 +689,7 @@ components:
         resolution:
           type: string
           example: 2k
-          description: >
-            仅 `nanobanana-pro` / `nano-banana-2` / `nano-banana-2-fast` /
-            `gpt-image-2` 支持；取值集详见请求体描述。
+          description: Supported only by selected models. See the request body description.
           enum:
             - 0.5k
             - 1k
@@ -603,7 +698,7 @@ components:
             - 8k
         quality:
           type: string
-          description: 仅 `gpt-image-2` 支持。
+          description: Supported only by `gpt-image-2`.
           enum:
             - low
             - medium
@@ -613,18 +708,20 @@ components:
           format: int32
           minimum: 1
           maximum: 15
-          description: 仅 `seedream-4.5-seq` / `seedream-5.0-lite-seq` 支持，单次输出图片数量。
+          description: Supported only by `seedream-4.5-seq` and `seedream-5.0-lite-seq`.
         concurrency:
           type: integer
           format: int32
-          description: 并发数，控制一次性输出的结果数量
+          description: Number of concurrent outputs to generate.
           example: 1
         sync_mod:
           type: boolean
           example: false
     OpenAiActorListBody:
       type: object
-      description: 系统演员列表筛选与分页；筛选项为小写，英文短语中空格用连字符。
+      description: >-
+        System actor filters and pagination. Filter values are lowercase; spaces
+        in English phrases use hyphens.
       properties:
         gender:
           type: array
@@ -706,13 +803,14 @@ components:
               - latino
         industry:
           type: array
-          description: |
-            按服务端行业分类过滤（如 `beauty` / `fitness` / `finance` 等）；取值集以服务端注册表为准。
+          description: >-
+            Filter by server-side industry category, such as `beauty`,
+            `fitness`, or `finance`. Valid values follow the server registry.
           items:
             type: string
     OpenAiActorSayBody:
       type: object
-      description: 系统演员语音合成请求。
+      description: System actor speech synthesis request.
       properties:
         actor_id:
           type: string
@@ -731,13 +829,13 @@ components:
           format: float
     OpenAiActorPerformBody:
       type: object
-      description: 演出任务请求；适用于系统演员与自定义 Persona。
+      description: Actor performance request for both system actors and custom Personas.
       properties:
         script:
           type: string
         actor_id:
           type: string
-          description: 系统演员 ID，或 Persona 的 actor_id
+          description: System actor ID or Persona `actor_id`.
         auto_emotion:
           type: boolean
         speed:
@@ -756,30 +854,32 @@ components:
           format: float
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenPersonaCreateBody:
       type: object
-      description: 创建自定义 Persona 请求。
+      description: Create custom Persona request.
       properties:
         photo_url:
           type: string
         voice_audio_url:
           type: string
-          description: 可选，用于语音克隆
+          description: Optional audio sample for voice cloning.
         name:
           type: string
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenPersonaDeleteBody:
       type: object
-      description: 删除 Persona 请求。
+      description: Delete Persona request.
       properties:
         actor_id:
           type: string
     OpenPersonalListBody:
       type: object
-      description: 个人创建演员列表分页查询；`offset`、`limit` 为分页参数。
+      description: >-
+        Paginated list request for personal actors. `offset` and `limit` are
+        pagination parameters.
       properties:
         offset:
           type: integer
@@ -789,7 +889,7 @@ components:
           format: int32
     OpenPersonalListData:
       type: object
-      description: 个人创建演员列表及分页信息。
+      description: Personal actor list and pagination metadata.
       properties:
         items:
           type: array
@@ -805,70 +905,57 @@ components:
           format: int32
     OpenAdCloneAnalyzeBody:
       type: object
-      description: 视频复刻 — 分析源视频并生成 prompt。
+      description: Analyze a source ad video and generate a prompt.
       properties:
         video_url:
           type: string
-          description: 源视频 URL
+          description: Source video URL.
         clip_start:
           type: integer
           format: int32
           minimum: 0
-          description: 圈选起始时间（秒，非负）
+          description: Clip start time in seconds. Must be non-negative.
         clip_end:
           type: integer
           format: int32
           minimum: 0
           description: >-
-            圈选结束时间（秒）；须 clip_end > clip_start，且 clip_end - clip_start ≤ 12（片段最长
-            12 秒）
+            Clip end time in seconds. Must be greater than `clip_start`, with a
+            maximum clip length of 12 seconds.
     OpenAdCloneGenerateBody:
       type: object
-      description: 视频复刻 — 提交生成任务；响应含异步任务 ID（`workspace_id`）。
+      description: >-
+        Submit an AdClone generation task. The response contains an async task
+        ID (`workspace_id`).
       properties:
         prompt:
           type: string
-          description: prompt（可在 Analyze 返回基础上修改）
+          description: Prompt. You can modify the prompt returned by Analyze.
         video_url:
           type: string
-          description: 源视频片段 URL（Analyze 返回的 video_segment_url）
+          description: Source video segment URL returned by Analyze.
         concurrent:
           type: integer
           format: int32
           minimum: 1
-          description: 并发生成数量（≥1）
+          description: Number of concurrent generations. Must be at least 1.
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoGenerateBody:
       type: object
-      description: >
-        视频生成。文生视频时 `start_frame` / `end_frame` / `reference_*` 留空；
+      description: >-
+        Generate a video. For text-to-video, leave `start_frame`, `end_frame`,
+        and `reference_*` empty.
 
-        图生视频时通过 `start_frame`（可叠加 `end_frame`）控制首尾帧；多参考媒体由 `reference_images` /
-        `reference_videos` / `reference_audios` 携带。
+        For image-to-video, use `start_frame` and optionally `end_frame` to
+        control first and last frames.
+
+        Multiple reference media are supplied through `reference_images`,
+        `reference_videos`, and `reference_audios`.
 
 
-        **各模型规则**（取值集与上限按模型而定，服务端校验为准）：
-
-
-        | model | duration | resolution | ratio | start/end_frame |
-        reference_images | reference_videos | reference_audios | 备注 |
-
-        |---|---|---|---|---|---|---|---|---|
-
-        | `veo-3.1` | 4/6/8（默认 8） | 720p / 1080p / 4k | 16:9 / 9:16 | ≤2 | 无上限 |
-        — | — | frame 与 reference 互斥 |
-
-        | `kling-3.0` | 3~15（默认 8） | — | — | ≤2 | ≤1 | — | — | |
-
-        | `grok` | 6/10（默认 6） | — | — | 不支持 | ≤1（作为首帧使用） | — | — | |
-
-        | `seedance-2.0` | 4~15（默认 15） | 720p / 1080p | — | ≤2 | ≤9 | ≤3 | ≤3 |
-        frame 与 reference 互斥；audio 需配 image/video |
-
-        | `happyhorse-1.0` | 3~15（默认 5） | 720p / 1080p | 16:9 / 9:16 / 1:1 / 4:3
-        / 3:4 | ≤1 | ≤9 | ≤1（有视频时图片改限 ≤5） | — | frame 与 reference 互斥 |
+        Model capability limits vary by model and are validated by the server.
       properties:
         prompt:
           type: string
@@ -881,11 +968,11 @@ components:
             - grok
             - seedance-2.0
             - happyhorse-1.0
-          description: 模型短名称，省略时走服务端默认。
+          description: Short model name. If omitted, the server default is used.
         ratio:
           type: string
           example: '16:9'
-          description: 取值集因 model 而异，详见请求体表格。
+          description: Supported values vary by model.
           enum:
             - '16:9'
             - '9:16'
@@ -895,21 +982,21 @@ components:
         duration:
           type: integer
           format: int32
-          description: 视频时长（秒）。取值集 / 范围因 model 而异，详见请求体表格。
+          description: Video duration in seconds. Supported values or ranges vary by model.
         resolution:
           type: string
           example: 1080p
-          description: 仅部分模型支持；取值集因 model 而异，详见请求体表格。
+          description: Supported only by selected models; values vary by model.
           enum:
             - 720p
             - 1080p
             - 4k
         start_frame:
           type: string
-          description: 首帧图片 URL
+          description: First-frame image URL.
         end_frame:
           type: string
-          description: 尾帧图片 URL
+          description: Last-frame image URL.
         reference_images:
           type: array
           items:
@@ -924,25 +1011,31 @@ components:
             type: string
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
         idempotency_key:
           type: string
-          description: 幂等键，相同 key 重复请求复用同一任务
+          description: >-
+            Idempotency key. Repeated requests with the same key reuse the same
+            task.
     OpenVideoExtendBody:
       type: object
-      description: >
-        视频延长。源视频二选一：`workspace_id`（内部）或 `video_url`（外部）；同时传 / 同时空均报错。
+      description: >-
+        Extend a video. Provide either `workspace_id` for an internal source
+        video or `video_url` for an external source video; sending both or
+        neither returns an error.
 
-        `duration` 为增量秒数。
+        `duration` is the number of seconds appended to the source video.
 
 
-        **仅支持 `seedance-2.0` 模型基座**，不开放其他模型。`duration` 取值范围 4~15（默认
-        15），`resolution` 取 `720p` / `1080p`。
+        Only the `seedance-2.0` model base is supported. `duration` ranges from
+        4 to 15 seconds, defaulting to 15. `resolution` supports `720p` and
+        `1080p`.
       properties:
         workspace_id:
           type: string
         video_url:
           type: string
+          description: Source video URL.
         prompt:
           type: string
         duration:
@@ -950,13 +1043,13 @@ components:
           format: int32
           minimum: 4
           maximum: 15
-          description: 在源视频末尾追加的秒数；范围 4~15，默认 15。
+          description: 'Seconds to append to the source video. Range: 4 to 15. Default: 15.'
         model:
           type: string
           enum:
             - seedance-2.0
           default: seedance-2.0
-          description: 仅支持 `seedance-2.0`。
+          description: Only `seedance-2.0` is supported.
         ratio:
           type: string
         resolution:
@@ -966,21 +1059,27 @@ components:
             - 1080p
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
         idempotency_key:
           type: string
     OpenVideoEditBody:
       type: object
-      description: |
-        视频编辑。源视频二选一：`workspace_id` 或 `video_url`；同时传 / 同时空均报错。
-        `mask_url` 可选；非空时为局部编辑掩码（模型支持度以服务端为准）。
+      description: >-
+        Edit a video. Provide either `workspace_id` or `video_url`; sending both
+        or neither returns an error.
 
-        **仅支持 `seedance-2.0` 模型基座**，不开放其他模型。`resolution` 取 `720p` / `1080p`。
+        `mask_url` is optional and enables local editing when supported by the
+        model.
+
+
+        Only the `seedance-2.0` model base is supported. `resolution` supports
+        `720p` and `1080p`.
       properties:
         workspace_id:
           type: string
         video_url:
           type: string
+          description: Source video URL.
         prompt:
           type: string
         mask_url:
@@ -994,7 +1093,7 @@ components:
           enum:
             - seedance-2.0
           default: seedance-2.0
-          description: 仅支持 `seedance-2.0`。
+          description: Only `seedance-2.0` is supported.
         ratio:
           type: string
         resolution:
@@ -1004,26 +1103,26 @@ components:
             - 1080p
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
         idempotency_key:
           type: string
     OpenVideoAnalyzeBody:
       type: object
-      description: 视频拉片任务。
+      description: Video analysis task.
       properties:
         video_url:
           type: string
-          description: 源视频 URL
+          description: Source video URL.
         workspace_id:
           type: integer
           format: int64
-          description: 关联工作区 ID，无则传 0
+          description: Related workspace ID. Send 0 if not available.
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoLipSyncBody:
       type: object
-      description: 视频对口型任务。
+      description: Video lip sync task.
       properties:
         avatar_url:
           type: string
@@ -1033,72 +1132,79 @@ components:
           type: string
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoInpaintBody:
       type: object
-      description: 视频水印消除任务。
+      description: Video watermark removal task.
       properties:
         video_url:
           type: string
+          description: Source video URL.
         workspace_id:
           type: integer
           format: int64
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoTranslateBody:
       type: object
-      description: 视频翻译任务。
+      description: Video translation task.
       properties:
         video_url:
           type: string
+          description: Source video URL.
         target_lang:
           type: string
-          description: 目标语言
+          description: Target language.
         workspace_id:
           type: integer
           format: int64
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoUpscaleBody:
       type: object
-      description: 视频超分任务。
+      description: Video upscaling task.
       properties:
         video_url:
           type: string
+          description: Source video URL.
         workspace_id:
           type: integer
           format: int64
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoCharacterSwapBody:
       type: object
-      description: 视频换脸任务。
+      description: Video character or face swap task.
       properties:
         video_url:
           type: string
+          description: Source video URL.
         image_url:
           type: string
-          description: 目标人脸参考图 URL
+          description: Target face reference image URL.
         workspace_id:
           type: integer
           format: int64
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoMotionControlBody:
       type: object
-      description: 视频动作控制任务。
+      description: Video motion control task.
       properties:
         video_url:
           type: string
+          description: Source video URL.
         image_url:
           type: string
         character_orientation:
           type: string
-          description: 角色朝向，默认与视频一致时可传 video
+          description: >-
+            Character orientation. Use `video` when it should match the source
+            video.
         keep_original_sound:
           type: boolean
         negative_prompt:
@@ -1112,13 +1218,14 @@ components:
           format: int64
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenVideoSubtitleBody:
       type: object
-      description: 视频字幕任务。
+      description: Video subtitle generation task.
       properties:
         video_url:
           type: string
+          description: Source video URL.
         source_language:
           type: string
         translate_language:
@@ -1132,18 +1239,19 @@ components:
           format: int64
         callback_id:
           type: string
-          description: 自定义追踪 ID，webhook URL 后台配置
+          description: Custom tracking ID for webhook correlation.
     OpenBatchGetWorkStatusBody:
       type: object
-      description: 批量按 `workspace_ids` 查询异步任务状态。
+      description: Batch query async task status by `workspace_ids`.
       properties:
         workspace_ids:
           type: array
           items:
             type: string
+          description: Workspace IDs to query.
     OpenBatchGetWorkStatusData:
       type: object
-      description: 批量异步任务状态返回。
+      description: Batch async task status response.
       properties:
         items:
           type: array
@@ -1151,19 +1259,19 @@ components:
             $ref: '#/components/schemas/OpenWorkData'
     OpenGetWorkStatusBody:
       type: object
-      description: 按 `workspace_id` 查询异步任务状态。
+      description: Query async task status by `workspace_id`.
       properties:
         workspace_id:
           type: string
     OpenGetPersonaStatusBody:
       type: object
-      description: 按 `actor_id` 查询 Persona 状态。
+      description: Query Persona status by `actor_id`.
       properties:
         actor_id:
           type: string
     ImageCreateData:
       type: object
-      description: 图片生成结果（图片 URL 与关联任务 ID）。
+      description: Image generation result, including image URLs and related task IDs.
       properties:
         images:
           type: array
@@ -1175,7 +1283,7 @@ components:
             type: string
     OpenAiActorSayData:
       type: object
-      description: 语音合成结果。
+      description: Speech synthesis result.
       properties:
         audio_url:
           type: string
@@ -1184,7 +1292,7 @@ components:
           format: int32
     OpenAiActorListData:
       type: object
-      description: 系统演员列表与分页信息。
+      description: System actor list and pagination metadata.
       properties:
         infos:
           type: array
@@ -1200,30 +1308,30 @@ components:
           format: int32
     OpenAdCloneAnalyzeData:
       type: object
-      description: 视频复刻分析结果。
+      description: AdClone analysis result.
       properties:
         prompt:
           type: string
-          description: AI 分析生成的文生视频 prompt
+          description: Text-to-video prompt generated by AI analysis.
         video_segment_url:
           type: string
-          description: 截取的视频片段 URL
+          description: Clipped video segment URL.
         duration:
           type: integer
           enum:
             - 4
             - 8
             - 12
-          description: 片段时长（秒），仅允许 4、8、12
+          description: 'Clip duration in seconds. Allowed values: 4, 8, or 12.'
     OpenPersonaDeleteData:
       type: object
-      description: 删除操作是否成功。
+      description: Delete operation result.
       properties:
         ok:
           type: boolean
     OpenWorkData:
       type: object
-      description: 异步任务状态与结果摘要。
+      description: Async task status and result summary.
       properties:
         workspace_id:
           type: string
@@ -1232,6 +1340,7 @@ components:
           description: pending / processing / completed / failed
         callback_id:
           type: string
+          description: Custom tracking ID for webhook correlation.
         result_type:
           type: string
           enum:
@@ -1254,7 +1363,7 @@ components:
           format: int64
     OpenPersonaData:
       type: object
-      description: 自定义 Persona 信息。
+      description: Custom Persona information.
       properties:
         actor_id:
           type: string
@@ -1263,6 +1372,7 @@ components:
           description: pending / processing / completed / failed
         callback_id:
           type: string
+          description: Custom tracking ID for webhook correlation.
         name:
           type: string
         photo_url:
@@ -1419,7 +1529,7 @@ components:
               $ref: '#/components/schemas/OpenAdCloneAnalyzeData'
     OpenAiActorInfo:
       type: object
-      description: 系统演员信息
+      description: System actor information.
       properties:
         id:
           type: integer
@@ -1427,92 +1537,95 @@ components:
         hired_at:
           type: integer
           format: int64
-          description: 雇佣时间（Unix 秒）
+          description: Hire time as Unix seconds.
         actor_id:
           type: string
-          description: 演员 ID（uuid）
+          description: Actor ID (UUID).
         name:
           type: string
-          description: 名字
+          description: Name.
         age:
           type: string
-          description: 年龄标签
+          description: Age label.
         gender:
           type: string
-          description: 性别
+          description: Gender.
         situation:
           type: array
           items:
             type: string
-          description: 场景
+          description: Scene tags.
         pose:
           type: string
         shot_type:
           type: string
         skin_tone:
           type: string
-          description: 肤色编码，取值 skin-001 ~ skin-006
+          description: Skin tone code, from `skin-001` to `skin-006`.
         accessories:
           type: array
           items:
             type: string
-          description: 物品
+          description: Accessories.
         special_for:
           type: array
           items:
             type: string
-          description: 订阅用户分级别专属
+          description: Subscription tiers this actor is exclusive to.
         preview_url:
           type: string
-          description: 前端预览图片 URL（已压缩）
+          description: Compressed preview image URL.
         photo_url:
           type: string
-          description: 具体要使用的图片模板 URL
+          description: Image template URL to use.
         original_show_off_url:
           type: string
-          description: 前端展示视频 URL（原始）
+          description: Original showcase video URL.
         show_off_url:
           type: string
-          description: 前端展示视频 URL（已压缩）
+          description: Compressed showcase video URL.
         light:
           type: string
-          description: 灯光设定
+          description: Lighting setup.
         audition_audio_url:
           type: string
-          description: 试镜音频链接
+          description: Audition audio URL.
         score:
           type: integer
           format: int32
           minimum: 0
           maximum: 100
-          description: 演员评分，满分 100
+          description: Actor score. Maximum is 100.
         status:
           type: string
+          description: pending / processing / completed / failed
         voices:
           type: array
           items:
             $ref: '#/components/schemas/AiActorVoiceOption'
         ethnicity:
           type: string
-          description: 主要族裔；取值 `asian` / `caucasian` / `african` / `latino`
+          description: >-
+            Primary ethnicity. Values include `asian`, `caucasian`, `african`,
+            and `latino`.
         poses:
           type: array
-          description: 历史姿态列表（`pose` 为主姿态）
+          description: Historical pose list. `pose` is the primary pose.
           items:
             type: string
         shot_types:
           type: array
-          description: 历史镜头类型列表（`shot_type` 为主镜头类型）
+          description: Historical shot type list. `shot_type` is the primary shot type.
           items:
             type: string
         industries:
           type: array
-          description: 适配行业；取值集以服务端注册表为准
+          description: Supported industries. Valid values follow the server registry.
           items:
             type: string
     AiActorVoiceOption:
       type: object
-      description: 演员语音选项
+      description: Actor voice option.
       properties:
         voice_id:
           type: string
