@@ -4,8 +4,13 @@ excerpt: >-
   Start here for AdsTurbo Open API authentication, async jobs, and response
   handling. Chinese API Reference: [查看中文接口文档](/reference/zhsaasimagecreate).
 api_config: getting-started
+deprecated: false
 hidden: false
 icon: icon-book1
+metadata:
+  description: >-
+    Start here for AdsTurbo Open API authentication, async jobs, and response
+    handling. Chinese API Reference: 查看中文接口文档.
 ---
 AdsTurbo Open API lets you create images, generate and edit videos, run AI Actor workflows, manage Personas, recreate ads with AdClone, and check asynchronous task status.
 
