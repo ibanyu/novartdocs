@@ -5,7 +5,7 @@ info:
     AdsTurbo Open API 中文文档，所有接口路径以 `/openapi/v1/` 开头。
 
 
-    **English version**: [View English API Reference](/reference/api-overview)
+    **Reference overview**: [API Overview / API 介绍](/reference/getting-started)
 
 
     **Base URL**：`https://www.adsturbo.ai/klian/novartapi`
