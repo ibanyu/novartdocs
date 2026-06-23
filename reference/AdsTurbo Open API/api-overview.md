@@ -8,6 +8,8 @@ hidden: false
 
 AdsTurbo Open API lets you create images, generate and edit videos, run AI Actor workflows, manage Personas, recreate ads with AdClone, and check asynchronous task status.
 
+Chinese documentation: [查看中文 API 文档](/reference/zh-api-overview). Each English endpoint page also links to its matching Chinese endpoint page.
+
 ## Base URL
 
 ```text
