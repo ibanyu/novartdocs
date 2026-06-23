@@ -5,7 +5,7 @@ info:
     AdsTurbo Open API documentation. All endpoints are under `/openapi/v1/`.
 
 
-    **Reference overview**: [API Overview](/reference/getting-started)
+    **Reference overview**: [API Overview](/reference/api-overview)
 
 
     **Base URL**: `https://www.adsturbo.ai/klian/novartapi`
