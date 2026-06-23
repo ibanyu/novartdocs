@@ -1,15 +1,15 @@
 ---
-title: API Overview / API 介绍
+title: API Overview
 excerpt: >-
-  AdsTurbo Open API authentication, async jobs, response handling, and common
-  workflows.
+  Start here for AdsTurbo Open API authentication, async jobs, and response
+  handling.
 api_config: getting-started
 hidden: false
 icon: icon-book1
 ---
 AdsTurbo Open API lets you create images, generate and edit videos, run AI Actor workflows, manage Personas, recreate ads with AdClone, and check asynchronous task status.
 
-AdsTurbo Open API 可用于图片生成、视频生成与编辑、AI Actor、Persona、AdClone，以及异步任务状态查询。
+Chinese endpoint pages are linked from the matching English endpoint pages.
 
 ## Base URL
 
@@ -55,5 +55,3 @@ Most video, actor, Persona, and AdClone endpoints are asynchronous:
 4. Use `callback_id` to correlate results with your own job records.
 
 Start with the endpoint pages in the sidebar for exact request and response schemas.
-
-具体字段和响应结构见左侧各接口详情页。
