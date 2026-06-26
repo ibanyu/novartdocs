@@ -42,6 +42,10 @@ tags:
     description: Video generation and editing tools
   - name: Work
     description: Async task status
+  - name: Image (v2beta)
+    description: Image tools (v2beta)
+  - name: Video (v2beta)
+    description: Video tools (v2beta)
 security:
   - bearerAuth: []
 paths:
@@ -605,6 +609,181 @@ paths:
         > 中文版本: [查看中文文档](/reference/zhopengetpersonastatus)
 
         Query Persona processing status by `actor_id`.
+  /openapi/v2beta/image/cutout:
+    post:
+      tags:
+        - Image (v2beta)
+      summary: Image cutout
+      operationId: openImageCutout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageCutoutBody'
+      responses:
+        '200':
+          description: JSON business response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenimagecutout)
+
+
+        Submit an image cutout task. Async — query status with
+        `/openapi/v1/work/status`.
+  /openapi/v2beta/image/ecommerce:
+    post:
+      tags:
+        - Image (v2beta)
+      summary: E-commerce product image
+      operationId: openImageEcommerce
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageEcommerceBody'
+      responses:
+        '200':
+          description: JSON business response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenimageecommerce)
+
+
+        Submit an e-commerce product image task. Async — query status with
+        `/openapi/v1/work/status`.
+  /openapi/v2beta/image/enhance:
+    post:
+      tags:
+        - Image (v2beta)
+      summary: Image enhancement
+      operationId: openImageEnhance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageEnhanceBody'
+      responses:
+        '200':
+          description: JSON business response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenimageenhance)
+
+
+        Submit an image enhancement task. Async — query status with
+        `/openapi/v1/work/status`.
+  /openapi/v2beta/image/magic-eraser:
+    post:
+      tags:
+        - Image (v2beta)
+      summary: AI image eraser
+      operationId: openImageMagicEraser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageMagicEraserBody'
+      responses:
+        '200':
+          description: JSON business response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenimagemagiceraser)
+
+
+        Submit an AI image eraser task. Async — query status with
+        `/openapi/v1/work/status`.
+  /openapi/v2beta/image/poster:
+    post:
+      tags:
+        - Image (v2beta)
+      summary: Event poster image
+      operationId: openImagePoster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImagePosterBody'
+      responses:
+        '200':
+          description: JSON business response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenimageposter)
+
+
+        Submit an event poster image task. Async — query status with
+        `/openapi/v1/work/status`.
+  /openapi/v2beta/video/enhance:
+    post:
+      tags:
+        - Video (v2beta)
+      summary: Video enhancement
+      operationId: openVideoEnhanceV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenVideoEnhanceV2Body'
+      responses:
+        '200':
+          description: JSON business response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenvideoenhancev2)
+
+
+        Submit a video enhancement task. Async — query status with
+        `/openapi/v1/work/status`.
+  /openapi/v2beta/video/magic-eraser:
+    post:
+      tags:
+        - Video (v2beta)
+      summary: AI video eraser
+      operationId: openVideoMagicEraser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenVideoMagicEraserBody'
+      responses:
+        '200':
+          description: JSON business response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: >-
+        > 中文版本: [查看中文文档](/reference/zhopenvideomagiceraser)
+
+
+        Submit an AI video eraser task. Async — query status with
+        `/openapi/v1/work/status`.
 components:
   securitySchemes:
     bearerAuth:
@@ -1635,3 +1814,209 @@ components:
           type: string
         source:
           type: string
+    OpenImageCutoutBody:
+      type: object
+      description: Image cutout task request.
+      properties:
+        method:
+          type: string
+          description: 抠图方法
+        image_url:
+          type: string
+          description: 原图 URL
+        output_format:
+          type: string
+          description: 输出格式
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID，用于关联异步任务
+        callback_id:
+          type: string
+          description: Custom tracking ID for webhook correlation.
+        idempotency_key:
+          type: string
+          description: 幂等键，防止重复提交
+    OpenImageEcommerceBody:
+      type: object
+      description: E-commerce product image task request.
+      properties:
+        methods:
+          type: array
+          items:
+            type: string
+          description: 生成方法列表
+        user_input:
+          type: string
+          description: 用户输入描述
+        reference_image_urls:
+          type: array
+          items:
+            type: string
+          description: 参考图片 URL 列表
+        product_info:
+          type: string
+          description: 产品信息
+        language:
+          type: string
+          description: 语言
+        aspect_ratio:
+          type: string
+          description: 宽高比
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: Custom tracking ID for webhook correlation.
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenImageEnhanceBody:
+      type: object
+      description: Image enhancement task request.
+      properties:
+        method:
+          type: string
+          description: 增强方法
+        image_url:
+          type: string
+          description: 原图 URL
+        scale:
+          type: integer
+          format: int32
+          description: 放大倍数
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: Custom tracking ID for webhook correlation.
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenImageMagicEraserBody:
+      type: object
+      description: AI image eraser task request.
+      properties:
+        method:
+          type: string
+          description: 消除方法
+        image_url:
+          type: string
+          description: 原图 URL
+        mask_url:
+          type: string
+          description: 蒙版 URL
+        instruction:
+          type: string
+          description: 消除指令描述
+        aspect_ratio:
+          type: string
+          description: 宽高比
+        resolution:
+          type: string
+          description: 输出分辨率
+        quantity:
+          type: integer
+          format: int32
+          description: 生成数量
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: Custom tracking ID for webhook correlation.
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenImagePosterBody:
+      type: object
+      description: Event poster image task request.
+      properties:
+        method:
+          type: string
+          description: 海报生成方法
+        event_info:
+          type: string
+          description: 活动信息
+        language:
+          type: string
+          description: 语言
+        aspect_ratio:
+          type: string
+          description: 宽高比
+        reference_image_urls:
+          type: array
+          items:
+            type: string
+          description: 参考图片 URL 列表
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: Custom tracking ID for webhook correlation.
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenVideoEnhanceV2Body:
+      type: object
+      description: Video enhancement task request.
+      properties:
+        method:
+          type: string
+          description: 增强方法
+        video_url:
+          type: string
+          description: Source video URL.
+        duration:
+          type: integer
+          format: int32
+          description: 时长（秒）
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: Custom tracking ID for webhook correlation.
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenVideoMagicEraserBody:
+      type: object
+      description: AI video eraser task request.
+      properties:
+        method:
+          type: string
+          description: 消除方法
+        video_url:
+          type: string
+          description: Source video URL.
+        duration:
+          type: integer
+          format: int32
+          description: 时长（秒）
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: Custom tracking ID for webhook correlation.
+        idempotency_key:
+          type: string
+          description: 幂等键
