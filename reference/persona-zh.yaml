@@ -40,6 +40,10 @@ tags:
     description: 视频工具
   - name: 任务状态
     description: 异步任务状态
+  - name: 图片 (v2beta)
+    description: 图片工具（v2beta）
+  - name: 视频 (v2beta)
+    description: 视频工具（v2beta）
 security:
   - bearerAuth: []
 paths:
@@ -546,6 +550,146 @@ paths:
       description: >-
         > English version: [View English
         docs](/reference/opengetpersonastatus-1)
+  /openapi/v2beta/image/cutout:
+    post:
+      tags:
+        - 图片 (v2beta)
+      summary: 图片抠图
+      operationId: zhOpenImageCutout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageCutoutBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: '> English version: [View English docs](/reference/openimagecutout)'
+  /openapi/v2beta/image/ecommerce:
+    post:
+      tags:
+        - 图片 (v2beta)
+      summary: 电商产品图
+      operationId: zhOpenImageEcommerce
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageEcommerceBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: '> English version: [View English docs](/reference/openimageecommerce)'
+  /openapi/v2beta/image/enhance:
+    post:
+      tags:
+        - 图片 (v2beta)
+      summary: 图片增强
+      operationId: zhOpenImageEnhance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageEnhanceBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: '> English version: [View English docs](/reference/openimageenhance)'
+  /openapi/v2beta/image/magic-eraser:
+    post:
+      tags:
+        - 图片 (v2beta)
+      summary: AI 图片消除
+      operationId: zhOpenImageMagicEraser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImageMagicEraserBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: '> English version: [View English docs](/reference/openimagemagiceraser)'
+  /openapi/v2beta/image/poster:
+    post:
+      tags:
+        - 图片 (v2beta)
+      summary: 活动海报图
+      operationId: zhOpenImagePoster
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenImagePosterBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: '> English version: [View English docs](/reference/openimageposter)'
+  /openapi/v2beta/video/enhance:
+    post:
+      tags:
+        - 视频 (v2beta)
+      summary: 视频增强
+      operationId: zhOpenVideoEnhanceV2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenVideoEnhanceV2Body'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: '> English version: [View English docs](/reference/openvideoenhancev2)'
+  /openapi/v2beta/video/magic-eraser:
+    post:
+      tags:
+        - 视频 (v2beta)
+      summary: AI 视频消除
+      operationId: zhOpenVideoMagicEraser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenVideoMagicEraserBody'
+      responses:
+        '200':
+          description: JSON 业务响应
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSuccessOpenWorkEnt'
+      description: '> English version: [View English docs](/reference/openvideomagiceraser)'
 components:
   securitySchemes:
     bearerAuth:
@@ -1562,3 +1706,209 @@ components:
           type: string
         source:
           type: string
+    OpenImageCutoutBody:
+      type: object
+      description: 图片抠图请求
+      properties:
+        method:
+          type: string
+          description: 抠图方法
+        image_url:
+          type: string
+          description: 原图 URL
+        output_format:
+          type: string
+          description: 输出格式
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID，用于关联异步任务
+        callback_id:
+          type: string
+          description: 回调标识
+        idempotency_key:
+          type: string
+          description: 幂等键，防止重复提交
+    OpenImageEcommerceBody:
+      type: object
+      description: 电商产品图请求
+      properties:
+        methods:
+          type: array
+          items:
+            type: string
+          description: 生成方法列表
+        user_input:
+          type: string
+          description: 用户输入描述
+        reference_image_urls:
+          type: array
+          items:
+            type: string
+          description: 参考图片 URL 列表
+        product_info:
+          type: string
+          description: 产品信息
+        language:
+          type: string
+          description: 语言
+        aspect_ratio:
+          type: string
+          description: 宽高比
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: 回调标识
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenImageEnhanceBody:
+      type: object
+      description: 图片增强请求
+      properties:
+        method:
+          type: string
+          description: 增强方法
+        image_url:
+          type: string
+          description: 原图 URL
+        scale:
+          type: integer
+          format: int32
+          description: 放大倍数
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: 回调标识
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenImageMagicEraserBody:
+      type: object
+      description: AI 图片消除请求
+      properties:
+        method:
+          type: string
+          description: 消除方法
+        image_url:
+          type: string
+          description: 原图 URL
+        mask_url:
+          type: string
+          description: 蒙版 URL
+        instruction:
+          type: string
+          description: 消除指令描述
+        aspect_ratio:
+          type: string
+          description: 宽高比
+        resolution:
+          type: string
+          description: 输出分辨率
+        quantity:
+          type: integer
+          format: int32
+          description: 生成数量
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: 回调标识
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenImagePosterBody:
+      type: object
+      description: 活动海报图请求
+      properties:
+        method:
+          type: string
+          description: 海报生成方法
+        event_info:
+          type: string
+          description: 活动信息
+        language:
+          type: string
+          description: 语言
+        aspect_ratio:
+          type: string
+          description: 宽高比
+        reference_image_urls:
+          type: array
+          items:
+            type: string
+          description: 参考图片 URL 列表
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: 回调标识
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenVideoEnhanceV2Body:
+      type: object
+      description: 视频增强请求
+      properties:
+        method:
+          type: string
+          description: 增强方法
+        video_url:
+          type: string
+          description: 视频 URL
+        duration:
+          type: integer
+          format: int32
+          description: 时长（秒）
+        resolution:
+          type: string
+          description: 输出分辨率
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: 回调标识
+        idempotency_key:
+          type: string
+          description: 幂等键
+    OpenVideoMagicEraserBody:
+      type: object
+      description: AI 视频消除请求
+      properties:
+        method:
+          type: string
+          description: 消除方法
+        video_url:
+          type: string
+          description: 视频 URL
+        duration:
+          type: integer
+          format: int32
+          description: 时长（秒）
+        workspace_id:
+          type: string
+          description: 工作空间 ID
+        callback_id:
+          type: string
+          description: 回调标识
+        idempotency_key:
+          type: string
+          description: 幂等键
